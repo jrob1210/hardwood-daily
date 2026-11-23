@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hardwood Daily</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a newspaper box score. Ruled rows, mono numerals, one painted-lane red. */
+:root{
+  --paper:#e8eae2; --card:#f4f5ee; --ink:#14181c; --muted:#5b645e; --line:#c4c9bd;
+  --accent:#c4321c; --good:#1f7a4d; --warn:#b7791f;
+  --display:'Big Shoulders Display','Arial Narrow',Impact,sans-serif;
+  --body:'Instrument Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--paper:#101417;--card:#181d21;--ink:#e9ece4;--muted:#98a299;--line:#2d353a;--accent:#ee6a4f;--good:#4cc38a;--warn:#e0a94a;color-scheme:dark}
+}
+:root[data-theme="dark"]{--paper:#101417;--card:#181d21;--ink:#e9ece4;--muted:#98a299;--line:#2d353a;--accent:#ee6a4f;--good:#4cc38a;--warn:#e0a94a;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45}
+.wrap{max-width:620px;margin:0 auto;padding:18px 16px 56px}
+header{border-bottom:3px solid var(--ink);padding-bottom:10px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(40px,11vw,64px);line-height:.9;margin:0;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
+h1 span{color:var(--accent)}
+.meta{font-family:var(--mono);font-size:12px;text-align:right;color:var(--muted);white-space:nowrap}
+.meta b{color:var(--ink);font-weight:600}
+#league{display:grid;grid-template-columns:1fr 1fr;margin:12px 0 0;border:2px solid var(--ink)}
+#league button{font:600 14px var(--mono);letter-spacing:.06em;background:transparent;color:var(--ink);border:0;padding:9px 4px;cursor:pointer}
+#league button+button{border-left:2px solid var(--ink)}
+#league button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+nav{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line)}
+nav button{font:600 13px var(--mono);text-transform:uppercase;letter-spacing:.04em;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:12px 4px 10px;cursor:pointer}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav .done::after{content:" ✓";color:var(--good)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.panel{padding-top:18px}
+.rule{font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:14px}
+.big{font-family:var(--display);font-weight:900;font-size:clamp(38px,10vw,56px);line-height:1;text-transform:uppercase;margin:6px 0 4px;text-wrap:balance}
+.sub{color:var(--muted);margin:0 0 14px}
+.pass{margin:12px 0 0;padding:8px 12px;font-size:12px}
+.team{font:600 13px var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:0 0 16px}
+.four small{display:block;font:600 11px var(--mono);letter-spacing:.04em;color:var(--muted);margin-top:6px;text-transform:uppercase}
+.chip{display:inline-block;font:600 12px var(--mono);border:1px solid var(--ink);padding:1px 7px;margin-right:6px}
+.row{display:flex;gap:8px}
+input[type=text]{flex:1;min-width:0;font:400 17px var(--body);padding:12px;border:2px solid var(--ink);background:var(--card);color:var(--ink);border-radius:0}
+.combo{position:relative;flex:1;min-width:0;display:flex}
+.combo input{width:100%}
+.lb{position:absolute;left:0;right:0;top:100%;z-index:5;margin:0;padding:0;list-style:none;background:var(--card);border:2px solid var(--ink);border-top:0;max-height:260px;overflow-y:auto}
+.lb li{padding:11px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.lb li:last-child{border-bottom:0}
+.lb li[aria-selected="true"],.lb li:hover{background:var(--ink);color:var(--paper)}
+.btn{font:600 14px var(--mono);text-transform:uppercase;letter-spacing:.04em;background:var(--ink);color:var(--paper);border:2px solid var(--ink);padding:12px 16px;cursor:pointer;border-radius:0}
+.btn.alt{background:transparent;color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:default}
+.msg{min-height:1.6em;margin:10px 0;font-family:var(--mono);font-size:14px}
+.msg.bad{color:var(--accent)}.msg.ok{color:var(--good)}
+.pips{display:flex;gap:6px;margin:0 0 14px}
+.pip{width:28px;height:10px;background:var(--line)}
+.pip.g{background:var(--good)}.pip.y{background:var(--warn)}.pip.r{background:var(--accent)}.pip.now{outline:2px solid var(--ink);outline-offset:1px}
+.four{display:grid;grid-template-columns:1fr 1fr;gap:0;border:2px solid var(--ink);margin-bottom:14px}
+.four div{padding:16px 10px;font-family:var(--display);font-weight:700;font-size:clamp(20px,5.4vw,28px);text-transform:uppercase;text-align:center;background:var(--card);border:1px solid var(--line);text-wrap:balance}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opts .btn{background:var(--card);color:var(--ink);text-transform:none;font:600 15px var(--body);padding:14px 8px}
+.opts .btn.right{background:var(--good);color:#fff;border-color:var(--good)}
+.opts .btn.wrong{background:var(--accent);color:#fff;border-color:var(--accent)}
+.timer{font:900 56px var(--display);font-variant-numeric:tabular-nums}
+.timer.low{color:var(--accent)}
+.found{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.found span{font:600 13px var(--mono);border:1px solid var(--good);color:var(--good);padding:2px 7px}
+.found span.miss{border-color:var(--line);color:var(--muted)}
+.result{border:2px solid var(--ink);background:var(--card);padding:14px;margin-top:16px}
+.result pre{font:400 15px var(--mono);margin:0 0 12px;white-space:pre-wrap}
+#all .result{margin-top:28px}
+#all h2{font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
+.note{font-size:13px;color:var(--muted);margin-top:22px}
+@media (prefers-reduced-motion:no-preference){.pip{transition:background .2s}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="brand">Hardwood <span>Daily</span></h1>
+    <div class="meta" id="meta"></div>
+  </header>
+  <div id="league" role="group" aria-label="League"><button data-lg="nba" aria-pressed="true">NBA</button><button data-lg="nfl" aria-pressed="false">NFL</button></div>
+  <nav role="tablist" id="tabs">
+    <button role="tab" data-m="a">Where'd He Go</button>
+    <button role="tab" data-m="b">Connections</button>
+    <button role="tab" data-m="c">Pipeline</button>
+  </nav>
+  <main class="panel" id="panel"></main>
+  <section id="all" aria-label="Share all results"></section>
+  <p class="note" id="note"></p>
+</div>
+<script src="data.js"></script>
+<script src="data_nfl.js"></script>
+<script src="game.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
