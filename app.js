@@ -1,10 +1,10 @@
 (function () {
   var H = window.HD, P, ALL_PLACES, A, B, C, LG = 'nba';
   var KEY = H.dateKey();
-  var VER = 'v4';
+  var VER = 'v5'; // save-format version: changing it wipes every player's saved results and streaks
   // Slate salt per league. It seeds the daily picks, so bumping one (e.g. '-r3' -> '-r4') gives that league a new set
   // for today and drops any results saved against the old set. Bump it whenever you change that league's data file.
-  var SALT = { nba: '-r5', nfl: '-r7' };
+  var SALT = { nba: '-r6', nfl: '-r8' };
   var S = { days: {}, v: VER };
   var mode = 'a';
   var run = null; // live Pipeline run: {end, timer, found:[]}
@@ -16,7 +16,7 @@
     ALL_PLACES = Object.keys(H.groupBy(P)).sort();
     var k = KEY + SALT[lg] + (lg === 'nfl' ? '-nfl' : '');
     A = lg === 'nfl' ? H.dailyPlayersNFL(P, k) : H.dailyPlayers(P, k, 5);
-    B = H.dailyConnections(P, k, 3); C = H.dailyPipeline(P, k, lg);
+    B = H.dailyConnections(P, k, 3, lg); C = H.dailyPipeline(P, k, lg);
     var h1 = document.getElementById('brand'); if (h1) h1.innerHTML = brand() + ' <span>Daily</span>';
     document.title = brand() + ' Daily';
   }
@@ -76,23 +76,48 @@
         shareBlock(shareText('a'));
       bindCopy(shareText('a')); return;
     }
-    var p = A[s.i];
-    el.innerHTML = '<div class="rule"><span>Player ' + (s.i + 1) + ' of ' + A.length + '</span><span>' + (2 - s.tries) + ' guesses left</span></div>' + pips(s.res, s.i, A.length) +
+    var p = A[s.i], mc = s.tries === 1;
+    el.innerHTML = '<div class="rule"><span>Player ' + (s.i + 1) + ' of ' + A.length + '</span><span>' + (mc ? 'Last guess' : '2 guesses left') + '</span></div>' + pips(s.res, s.i, A.length) +
       '<span class="chip">' + p[3] + '</span><span class="sub">Where did he come from?</span>' +
       '<div class="big">' + esc(p[0]) + '</div>' + (p[4] ? '<div class="team">' + esc(p[4]) + '</div>' : '') +
-      '<form class="row" id="f" autocomplete="off"><div class="combo"><input type="text" id="g" role="combobox" aria-expanded="false" aria-controls="lb" aria-autocomplete="list" placeholder="Start typing your answer" aria-label="Your answer"><ul id="lb" class="lb" role="listbox" hidden></ul></div><button class="btn" id="go" disabled>Guess</button></form>' +
+      (mc ? choiceButtons(H.choices(p[1], P, KEY + LG + 'A' + s.i, s.wrong)) : guessForm()) +
       '<button type="button" class="btn alt pass" id="pass">I don\'t know</button>' +
-      '<div class="msg" id="msg" aria-live="polite">' + (s.tries === 1 ? esc(H.hintFor(p[1], LG) ? 'Hint: ' + H.hintFor(p[1], LG) : 'No hint on this one. One more try.') : '') + '</div><div id="after"></div>';
+      '<div class="msg' + (mc ? ' bad' : '') + '" id="msg" aria-live="polite">' + (mc ? esc(missMsg(p[1], s.wrong)) : '') + '</div><div id="after"></div>';
+    $('pass').onclick = function () { finishA(p, 'r', false); };
+    if (mc) { bindChoices(p[1], function (ok) { finishA(p, ok ? 'y' : 'r', ok); }); return; }
     $('g').focus();
     var chosen = bindPicker($('g'), $('lb'), $('go'));
-    $('pass').onclick = function () { finishA(p, 'r', false); };
     $('f').onsubmit = function (e) {
       e.preventDefault();
       var v = chosen(); if (!v) return;
-      if (v === p[1]) { finishA(p, s.tries === 0 ? 'g' : 'y', true); }
-      else if (s.tries === 0) { s.tries = 1; save(); renderA(); $('msg').className = 'msg bad'; $('msg').textContent = 'Not it. ' + (H.hintFor(p[1], LG) ? 'Hint: ' + H.hintFor(p[1], LG) : 'No hint on this one. One more try.'); }
-      else { finishA(p, 'r', false); }
+      if (v === p[1]) finishA(p, 'g', true);
+      else { s.tries = 1; s.wrong = v; save(); renderA(); }
     };
+  }
+  // After a wrong first guess the text box is swapped for four buttons (see H.choices).
+  function guessForm() {
+    return '<form class="row" id="f" autocomplete="off"><div class="combo"><input type="text" id="g" role="combobox" aria-expanded="false" aria-controls="lb" aria-autocomplete="list" placeholder="Start typing your answer" aria-label="Your answer"><ul id="lb" class="lb" role="listbox" hidden></ul></div><button class="btn" id="go" disabled>Guess</button></form>';
+  }
+  function missMsg(place, wrong) {
+    var hint = H.hintFor(place, LG);
+    return (wrong ? 'Not ' + wrong + '. ' : 'Not it. ') + (hint ? 'Hint: ' + hint + '. ' : '') + 'Pick one of these four.';
+  }
+  function choiceButtons(opts) {
+    return '<div class="opts" id="opts">' + opts.map(function (o) { return '<button type="button" class="btn" data-o="' + esc(o) + '">' + esc(o) + '</button>'; }).join('') + '</div>';
+  }
+  function bindChoices(answer, done) {
+    var btns = document.querySelectorAll('#opts button');
+    Array.prototype.forEach.call(btns, function (b) {
+      b.onclick = function () {
+        var pick = b.getAttribute('data-o');
+        Array.prototype.forEach.call(btns, function (x) {
+          x.disabled = true;
+          if (x.getAttribute('data-o') === answer) x.className = 'btn right';
+        });
+        if (pick !== answer) b.className = 'btn wrong';
+        done(pick === answer);
+      };
+    });
   }
   // Combobox: the guess button stays disabled until a suggestion is picked, so typos cannot be submitted.
   function bindPicker(input, list, btn, suggestFn, onPick) {
@@ -131,7 +156,7 @@
     save(); head();
     var msg = win ? 'Correct: ' + p[1] : 'It was ' + p[1];
     var el = $('panel');
-    el.querySelector('form').style.display = 'none'; $('pass').style.display = 'none';
+    var f = el.querySelector('form'); if (f) f.style.display = 'none'; $('pass').style.display = 'none';
     $('msg').className = 'msg ' + (win ? 'ok' : 'bad'); $('msg').textContent = msg;
     $('after').innerHTML = '<button class="btn" id="next">' + (s.done ? 'See results' : 'Next player') + '</button>';
     $('next').focus(); $('next').onclick = renderA;
@@ -147,22 +172,22 @@
         shareBlock(shareText('b'));
       bindCopy(shareText('b')); return;
     }
-    var q = B[s.i];
-    el.innerHTML = '<div class="rule"><span>Puzzle ' + (s.i + 1) + ' of 3</span><span>' + (2 - s.tries) + ' tries left</span></div>' + pips(s.res, s.i, 3) +
+    var q = B[s.i], mc = s.tries === 1;
+    el.innerHTML = '<div class="rule"><span>Puzzle ' + (s.i + 1) + ' of 3</span><span>' + (mc ? 'Last try' : '2 tries left') + '</span></div>' + pips(s.res, s.i, 3) +
       '<p class="sub">What do these two players have in common?</p>' +
       '<div class="four">' + q.four.map(function (p) { return '<div>' + esc(p[0]) + (p[4] ? '<small>' + esc(p[4]) + '</small>' : '') + '</div>'; }).join('') + '</div>' +
-      '<form class="row" id="f" autocomplete="off"><div class="combo"><input type="text" id="g" role="combobox" aria-expanded="false" aria-controls="lb" aria-autocomplete="list" placeholder="Start typing your answer" aria-label="Your answer"><ul id="lb" class="lb" role="listbox" hidden></ul></div><button class="btn" id="go" disabled>Guess</button></form>' +
+      (mc ? choiceButtons(H.choices(q.place, P, KEY + LG + 'B' + s.i, s.wrong)) : guessForm()) +
       '<button type="button" class="btn alt pass" id="pass">I don\'t know</button>' +
-      '<div class="msg" id="msg" aria-live="polite">' + (s.tries === 1 && H.hintFor(q.place, LG) ? esc('Hint: ' + H.hintFor(q.place, LG)) : '') + '</div><div id="after"></div>';
+      '<div class="msg' + (mc ? ' bad' : '') + '" id="msg" aria-live="polite">' + (mc ? esc(missMsg(q.place, s.wrong)) : '') + '</div><div id="after"></div>';
+    $('pass').onclick = function () { endB('r', false); };
+    if (mc) { bindChoices(q.place, function (ok) { endB(ok ? 'y' : 'r', ok); }); return; }
     $('g').focus();
     var chosen = bindPicker($('g'), $('lb'), $('go'));
-    $('pass').onclick = function () { endB('r', false); };
     $('f').onsubmit = function (e) {
       e.preventDefault();
       var v = chosen(); if (!v) return;
-      if (v === q.place) endB(s.tries === 0 ? 'g' : 'y', true);
-      else if (s.tries === 0) { s.tries = 1; save(); renderB(); $('msg').className = 'msg bad'; $('msg').textContent = 'Not ' + v + '. ' + (H.hintFor(q.place, LG) ? 'Hint: ' + H.hintFor(q.place, LG) + '. ' : '') + 'One try left.'; }
-      else endB('r', false);
+      if (v === q.place) endB('g', true);
+      else { s.tries = 1; s.wrong = v; save(); renderB(); }
     };
   }
   function endB(code, win) {
@@ -170,7 +195,7 @@
     s.res.push(code); s.tries = 0; s.i++;
     if (s.i >= B.length) s.done = true;
     save(); head();
-    $('panel').querySelector('form').style.display = 'none'; $('pass').style.display = 'none';
+    var f = $('panel').querySelector('form'); if (f) f.style.display = 'none'; $('pass').style.display = 'none';
     $('msg').className = 'msg ' + (win ? 'ok' : 'bad'); $('msg').textContent = win ? 'Correct: ' + q.place : 'It was ' + q.place;
     $('after').innerHTML = '<button class="btn" id="next">' + (s.done ? 'See results' : 'Next puzzle') + '</button>';
     $('next').focus(); $('next').onclick = renderB;

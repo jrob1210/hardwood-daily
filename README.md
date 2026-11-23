@@ -41,11 +41,11 @@ Each league's data file is one JavaScript array, one player per row:
 | 3. kind | `"c"` college, `"n"` country, `"x"` for the place `"No College"` (prep-to-pro, G League Ignite, etc.) |
 | 4. position | NBA: `G` `F` `C`. NFL: `QB` `RB` `WR` `TE` `OL` `DL` `LB` `DB` `ST` |
 | 5. team | Current team's full name, or `""` for a free agent (the team line is then hidden) |
-| 6. starter (NFL only) | `1` if he's first or second string on the depth chart, otherwise leave it off. In NFL "Where'd He Go", RB/WR/TE/OL/DL/LB/DB picks only come from flagged players. |
+| 6. starter (NFL only) | `1` if he's first or second string on the depth chart (QBs included: flag each team's QB1 and QB2), otherwise leave it off. NFL "Where'd He Go" only picks flagged players, except kickers/punters/long snappers (`ST`), who can appear in the 5th "wildcard" slot. NFL Connections only shows flagged players. Pipeline counts everyone. |
 
 ### Steps
 
-1. **Update the data file(s).** Edit rows by hand, or regenerate the whole array from your source. The current pools came from Basketball Reference (NBA) and lineups.com rosters plus ESPN depth charts (NFL). Update the source/date comment on the file's first line too.
+1. **Update the data file(s).** Edit rows by hand, or regenerate the whole array from your source. The current pools came from Basketball Reference (NBA) and lineups.com rosters plus ESPN depth charts (NFL), with QB1/QB2 flags from Ourlads (https://www.ourlads.com/nfldepthcharts/depthchartpos/QB). Starting QBs change often with injuries, so re-check those flags whenever you refresh. Update the source/date comment on the file's first line too.
 2. **Add hints for new places.** If a school or country appears for the first time, add it to the `HINTS` object in `game.js`. Copy the style of the existing entries:
    - `"Gonzaga": "College conference: Pac-12"`
    - `"Serbia": "A country in Europe"`

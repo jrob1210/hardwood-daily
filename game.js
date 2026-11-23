@@ -55,30 +55,37 @@
   function dailyPlayers(players, key, n) {
     return shuffle(players, rng(hash('A' + key))).slice(0, n || 5);
   }
-  // NFL Mode A: five players. 1 QB (any string); 2-3 skill (RB/WR/TE, first or second string); 4 an OL or defensive starter (position group picked first, evenly: OL/DL/LB/DB); 5 wildcard (QB, skill, defense or special teams; no OL). Everyone except QB and special teams must carry the depth-chart flag p[5].
+  // NFL Mode A: five players. 1 QB; 2-3 skill (RB/WR/TE); 4 an OL or defensive player (position group picked first, evenly: OL/DL/LB/DB); 5 wildcard (QB, skill, defense or special teams; no OL). Everyone except special teams must carry the depth-chart flag p[5] (first or second string).
   var NFL_SLOTS = [['QB'], ['RB', 'WR', 'TE'], ['RB', 'WR', 'TE'], ['OL', 'DL', 'LB', 'DB'], ['QB', 'RB', 'WR', 'TE', 'DL', 'LB', 'DB', 'ST']];
   function dailyPlayersNFL(players, key) {
     var r = rng(hash('A' + key)), used = {}, out = [];
     NFL_SLOTS.forEach(function (allowed, slot) {
       if (slot === 3) allowed = [allowed[Math.floor(r() * allowed.length)]];
-      var pool = shuffle(players.filter(function (p) { return allowed.indexOf(p[3]) >= 0 && !used[p[0]] && (!/^(RB|WR|TE|OL|DL|LB|DB)$/.test(p[3]) || p[5]); }), r);
+      var pool = shuffle(players.filter(function (p) { return allowed.indexOf(p[3]) >= 0 && !used[p[0]] && (!/^(QB|RB|WR|TE|OL|DL|LB|DB)$/.test(p[3]) || p[5]); }), r);
       var pick = pool[0];
       used[pick[0]] = 1; out.push(pick);
     });
     return out;
   }
   // Mode B: three puzzles. Each has two players sharing a place.
-  function dailyConnections(players, key, n) {
-    var g = groupBy(players), r = rng(hash('B' + key));
-    var places = Object.keys(g).filter(function (k) { return g[k].length >= 3; }).sort();
+  // NFL only shows depth-chart players (flag p[5]) so the pairs are recognisable; NBA uses everyone.
+  function dailyConnections(players, key, n, lg) {
+    var src = lg === 'nfl' ? players.filter(function (p) { return p[5]; }) : players;
+    var g = groupBy(src), r = rng(hash('B' + key)), min = lg === 'nfl' ? 2 : 3;
+    var places = Object.keys(g).filter(function (k) { return g[k].length >= min; }).sort();
     var picked = shuffle(places, r).slice(0, n || 3);
     return picked.map(function (place) {
-      var kind = g[place][0][2];
-      var four = shuffle(g[place], r).slice(0, 2);
-      var pool = Object.keys(g).filter(function (k) { return k !== place && g[k][0][2] === kind; }).sort();
-      var opts = shuffle([place].concat(shuffle(pool, r).slice(0, 3)), r);
-      return { place: place, kind: kind, four: four, options: opts };
+      return { place: place, kind: g[place][0][2], four: shuffle(g[place], r).slice(0, 2) };
     });
+  }
+  // Multiple choice shown after a wrong first guess: the answer plus three other places of the same kind
+  // (college vs country), never the wrong guess itself. Seeded, so it is the same on every reload.
+  function choices(place, players, key, wrong) {
+    var g = groupBy(players), kind = g[place] ? g[place][0][2] : 'c', r = rng(hash('M' + key + place));
+    var same = Object.keys(g).filter(function (k) { return g[k][0][2] === kind; }).sort();
+    var pool = same.length >= 6 ? same : Object.keys(g).sort();
+    var others = shuffle(pool, r).filter(function (k) { return k !== place && k !== wrong; }).slice(0, 3);
+    return shuffle([place].concat(others), r);
   }
   // Mode C: one place per day. Any place with at least PIPELINE_MIN[lg] players can be picked (no upper limit).
   var PIPELINE_MIN = { nba: 2, nfl: 4 };
@@ -144,6 +151,6 @@
     return c;
   }
   root.HD = { hash: hash, rng: rng, shuffle: shuffle, norm: norm, sameAnswer: sameAnswer, dateKey: dateKey,
-    groupBy: groupBy, dailyPlayers: dailyPlayers, dailyPlayersNFL: dailyPlayersNFL, NFL_SLOTS: NFL_SLOTS, dailyConnections: dailyConnections,
+    groupBy: groupBy, dailyPlayers: dailyPlayers, dailyPlayersNFL: dailyPlayersNFL, NFL_SLOTS: NFL_SLOTS, dailyConnections: dailyConnections, choices: choices,
     dailyPipeline: dailyPipeline, PIPELINE_MIN: PIPELINE_MIN, matchPlayer: matchPlayer, hintFor: hintFor, suggest: suggest, suggestNames: suggestNames };
 })(typeof window !== 'undefined' ? window : globalThis);

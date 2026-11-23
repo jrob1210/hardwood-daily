@@ -60,7 +60,7 @@ for (const L of leagues) {
     try {
       const A = L.lg === 'nfl' ? H.dailyPlayersNFL(L.list, k) : H.dailyPlayers(L.list, k, 5);
       if (A.length !== 5 || A.some((p) => !p)) throw new Error('could not fill 5 players');
-      const B = H.dailyConnections(L.list, k, 3);
+      const B = H.dailyConnections(L.list, k, 3, L.lg);
       if (B.length !== 3) throw new Error('could not build 3 connections');
       const C = H.dailyPipeline(L.list, k, L.lg);
       if (!C || !C.pool || !C.pool.length) throw new Error('empty pipeline');
@@ -68,7 +68,7 @@ for (const L of leagues) {
     d.setDate(d.getDate() + 1);
   }
   if (L.lg === 'nfl') {
-    ['RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'DB'].forEach((pos) => {
+    ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'DB'].forEach((pos) => {
       const n = L.list.filter((p) => p[3] === pos && p[5]).length;
       if (n < 5) warn(`only ${n} ${pos} rows carry the starter flag (6th field = 1); Where'd He Go draws from these`);
     });
