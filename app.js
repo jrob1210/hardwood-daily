@@ -4,7 +4,7 @@
   var VER = 'v4';
   // Slate salt per league. It seeds the daily picks, so bumping one (e.g. '-r3' -> '-r4') gives that league a new set
   // for today and drops any results saved against the old set. Bump it whenever you change that league's data file.
-  var SALT = { nba: '-r4', nfl: '-r6' };
+  var SALT = { nba: '-r5', nfl: '-r7' };
   var S = { days: {}, v: VER };
   var mode = 'a';
   var run = null; // live Pipeline run: {end, timer, found:[]}
@@ -16,7 +16,7 @@
     ALL_PLACES = Object.keys(H.groupBy(P)).sort();
     var k = KEY + SALT[lg] + (lg === 'nfl' ? '-nfl' : '');
     A = lg === 'nfl' ? H.dailyPlayersNFL(P, k) : H.dailyPlayers(P, k, 5);
-    B = H.dailyConnections(P, k, 3); C = H.dailyPipeline(P, k);
+    B = H.dailyConnections(P, k, 3); C = H.dailyPipeline(P, k, lg);
     var h1 = document.getElementById('brand'); if (h1) h1.innerHTML = brand() + ' <span>Daily</span>';
     document.title = brand() + ' Daily';
   }

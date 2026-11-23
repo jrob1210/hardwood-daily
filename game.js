@@ -80,10 +80,11 @@
       return { place: place, kind: kind, four: four, options: opts };
     });
   }
-  // Mode C: one place with at least five players.
-  function dailyPipeline(players, key) {
-    var g = groupBy(players), r = rng(hash('C' + key));
-    var places = Object.keys(g).filter(function (k) { return g[k].length >= 6 && g[k].length <= 18; }).sort();
+  // Mode C: one place per day. Any place with at least PIPELINE_MIN[lg] players can be picked (no upper limit).
+  var PIPELINE_MIN = { nba: 2, nfl: 4 };
+  function dailyPipeline(players, key, lg) {
+    var g = groupBy(players), r = rng(hash('C' + key)), min = PIPELINE_MIN[lg] || 2;
+    var places = Object.keys(g).filter(function (k) { return g[k].length >= min; }).sort();
     var place = shuffle(places, r)[0];
     return { place: place, pool: g[place] };
   }
@@ -144,5 +145,5 @@
   }
   root.HD = { hash: hash, rng: rng, shuffle: shuffle, norm: norm, sameAnswer: sameAnswer, dateKey: dateKey,
     groupBy: groupBy, dailyPlayers: dailyPlayers, dailyPlayersNFL: dailyPlayersNFL, NFL_SLOTS: NFL_SLOTS, dailyConnections: dailyConnections,
-    dailyPipeline: dailyPipeline, matchPlayer: matchPlayer, hintFor: hintFor, suggest: suggest, suggestNames: suggestNames };
+    dailyPipeline: dailyPipeline, PIPELINE_MIN: PIPELINE_MIN, matchPlayer: matchPlayer, hintFor: hintFor, suggest: suggest, suggestNames: suggestNames };
 })(typeof window !== 'undefined' ? window : globalThis);
