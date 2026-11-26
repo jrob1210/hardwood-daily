@@ -235,7 +235,7 @@
       // The school/country and its size stay hidden until the clock starts, so nobody can plan ahead.
       el.innerHTML = '<div class="rule"><span>Pipeline</span><span>60 seconds</span></div>' +
         '<div class="big">Mystery ' + (LG === 'nfl' ? 'school' : 'school or country') + '</div>' +
-        '<p class="sub">Name as many ' + LG.toUpperCase() + ' players from here as you can. One try a day, and the clock keeps running if you leave.</p>' +
+        '<p class="sub">Name as many current ' + LG.toUpperCase() + ' players from here as you can. One try a day, and the clock keeps running if you leave.</p>' +
         '<button class="btn" id="start">Start the clock</button>';
       $('start').onclick = startC; return;
     }
