@@ -64,7 +64,7 @@ Each league's data file is one JavaScript array, one player per row:
    var SALT = { nba: '-r6', nfl: '-r8' };   // e.g. change '-r6' to '-r7'
    ```
    The daily picks are seeded from the date plus this salt. Bumping it makes today's puzzles come from the new pool and clears anyone's half-finished game for today, so saved answers don't point at the wrong questions. Streaks and past days are kept. If you skip this step, today's puzzles still change, but anyone mid-game keeps progress saved against the old questions. Tomorrow's set is unaffected either way.
-3. **Update the footer note** if needed. In `app.js`, `note()` describes each pool (e.g. "2026-27 rosters", "full rosters incl. practice squads, Nov 2026").
+3. **Update "How to play"** if needed. It's the `<details class="about">` block in `index.html`; its last line says when the rosters are from ("Rosters as of November 2026"). While you're in `index.html`, change the `?v=` value on the four `<script>` tags (any new value, e.g. today's date) so browsers load the new files together instead of mixing cached old ones with new ones.
 4. **Check the data:**
    ```
    node tools/check-data.js

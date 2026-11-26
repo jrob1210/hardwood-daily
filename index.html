@@ -87,7 +87,11 @@ input[type=text]{flex:1;min-width:0;font:400 17px var(--body);padding:12px;borde
 .result pre{font:400 15px var(--mono);margin:0 0 12px;white-space:pre-wrap}
 #all .result{margin-top:28px}
 #all h2{font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
-.note{font-size:13px;color:var(--muted);margin-top:22px}
+/* How to play: collapsed by default at the bottom of the page. */
+.about{margin-top:28px;border-top:1px solid var(--line);padding-top:12px;font-size:14px;color:var(--muted)}
+.about summary{font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--ink);cursor:pointer;padding:4px 0}
+.about p{margin:10px 0}
+.about b{color:var(--ink)}
 @media (prefers-reduced-motion:no-preference){.pip{transition:background .2s}}
 </style>
 </head>
@@ -104,11 +108,20 @@ input[type=text]{flex:1;min-width:0;font:400 17px var(--body);padding:12px;borde
   </nav>
   <main class="panel" id="panel"></main>
   <section id="all" aria-label="Share all results"></section>
-  <p class="note" id="note"></p>
+  <details class="about">
+    <summary>How to play</summary>
+    <p><b>Where'd He Go:</b> Five players. Name the college each one last attended, or his home country if he skipped college. Miss and you get four choices.</p>
+    <p><b>Connections:</b> Two players share a school or country. Name it. Three puzzles a day.</p>
+    <p><b>Pipeline:</b> A mystery school is revealed when you start the clock. Name as many current players from there as you can in 60 seconds.</p>
+    <p><b>Rookie or Veteran:</b> Rookie sticks to starters (NBA) or QBs and skill players (NFL). Veteran uses full rosters. Pipeline is the same in both.</p>
+    <p>🟩 first try · 🟨 got it from the choices · 🟥 missed</p>
+    <p>New puzzles every day at midnight. Rosters as of November 2026.</p>
+  </details>
 </div>
-<script src="data.js"></script>
-<script src="data_nfl.js"></script>
-<script src="game.js"></script>
-<script src="app.js"></script>
+<!-- ?v= makes browsers fetch matching copies after a deploy. Change it (any new value) whenever you push changes. -->
+<script src="data.js?v=2026-11-26b"></script>
+<script src="data_nfl.js?v=2026-11-26b"></script>
+<script src="game.js?v=2026-11-26b"></script>
+<script src="app.js?v=2026-11-26b"></script>
 </body>
 </html>

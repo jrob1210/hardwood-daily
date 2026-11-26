@@ -318,23 +318,13 @@
     renderAll();
     var d = day(), g = cur();
     $('meta').innerHTML = LG.toUpperCase() + ' · ' + KEY + '<br>Streak <b>' + streak() + '</b>';
-    Array.prototype.forEach.call(document.querySelectorAll('#league button'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-lg') === LG ? 'true' : 'false'); });    note();
+    Array.prototype.forEach.call(document.querySelectorAll('#league button'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-lg') === LG ? 'true' : 'false'); });
     var tabs = document.querySelectorAll('#tabs button');
     Array.prototype.forEach.call(tabs, function (b) {
       var m = b.getAttribute('data-m');
       b.setAttribute('aria-selected', m === mode ? 'true' : 'false');
       b.className = (m === 'c' ? d.c : g[m]).done ? 'done' : '';
     });
-  }
-  function note() {
-    var n = $('note');
-    n.textContent = 'Pool: ' + P.length + ' current ' + LG.toUpperCase() + ' players (' + (LG === 'nfl' ? 'full rosters incl. practice squads, Nov 2026' : '2026-27 rosters') + ') across ' + ALL_PLACES.length + ' schools and countries. ' +
-      (LV === 'rookie' ? (LG === 'nfl' ? 'Rookie: only starting QBs, RBs, WRs and TEs. ' : 'Rookie: only starting fives. ') : 'Veteran: full rosters. ') +
-      'Pipeline is the same in both. A new set unlocks at local midnight.';
-    var rb = document.createElement('button');
-    rb.className = 'btn alt'; rb.textContent = 'Reset today'; rb.style.cssText = 'margin-left:8px;padding:4px 10px;font-size:12px';
-    rb.onclick = function () { if (run) { clearInterval(run.timer); run = null; } delete S.days[dk()]; day(); save(); render(); };
-    n.appendChild(rb);
   }
   function render() { head(); (mode === 'a' ? renderA : mode === 'b' ? renderB : renderC)(); }
   function start() {
