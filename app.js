@@ -327,7 +327,16 @@
     });
   }
   function render() { head(); (mode === 'a' ? renderA : mode === 'b' ? renderB : renderC)(); }
+  // "How to play" roster line, counted from the data files so it never goes stale.
+  function poolLine() {
+    var el = $('pool'); if (!el) return;
+    var n = function (x) { return x.toLocaleString('en-US'); };
+    var places = function (list) { return Object.keys(H.groupBy(list)).length; };
+    el.textContent = 'Current rosters as of November 2026: ' + n(window.PLAYERS.length) + ' NBA players from ' + places(window.PLAYERS) +
+      ' schools and countries, and ' + n(window.PLAYERS_NFL.length) + ' NFL players from ' + places(window.PLAYERS_NFL) + '.';
+  }
   function start() {
+    poolLine();
     load();
     setLeague(S.lg === 'nfl' ? 'nfl' : 'nba');
     day(); save();
