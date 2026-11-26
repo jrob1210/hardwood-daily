@@ -41,11 +41,11 @@ Each league's data file is one JavaScript array, one player per row:
 | 3. kind | `"c"` college, `"n"` country, `"x"` for the place `"No College"` (prep-to-pro, G League Ignite, etc.) |
 | 4. position | NBA: `G` `F` `C`. NFL: `QB` `RB` `WR` `TE` `OL` `DL` `LB` `DB` `ST` |
 | 5. team | Current team's full name, or `""` for a free agent (the team line is then hidden) |
-| 6. starter (NFL only) | `1` if he's first or second string on the depth chart (QBs included: flag each team's QB1 and QB2), otherwise leave it off. NFL "Where'd He Go" only picks flagged players, except kickers/punters/long snappers (`ST`), who can appear in the 5th "wildcard" slot. NFL Connections only shows flagged players. Pipeline counts everyone. |
+| 6. starter (NFL only) | `1` to mark a depth-chart player, otherwise leave it off. **QB:** each team's QB1 and QB2. **WR:** the first-string player at each of the team's three WR spots (3 per team). **RB/TE:** first and second string. **OL/DL/LB/DB:** starters. NFL "Where'd He Go" only picks flagged players, except kickers/punters/long snappers (`ST`), who can appear in the 5th "wildcard" slot. NFL Connections only shows flagged players. Pipeline counts everyone. |
 
 ### Steps
 
-1. **Update the data file(s).** Edit rows by hand, or regenerate the whole array from your source. The current pools came from Basketball Reference (NBA) and lineups.com rosters plus ESPN depth charts (NFL), with QB1/QB2 flags from Ourlads (https://www.ourlads.com/nfldepthcharts/depthchartpos/QB). Starting QBs change often with injuries, so re-check those flags whenever you refresh. Update the source/date comment on the file's first line too.
+1. **Update the data file(s).** Edit rows by hand, or regenerate the whole array from your source. The current pools came from Basketball Reference (NBA) and lineups.com rosters plus ESPN depth charts (NFL), with QB and WR flags from Ourlads (https://www.ourlads.com/nfldepthcharts/depthchartpos/QB and .../depthchartpos/WR). Starting QBs and WRs change often with injuries, so re-check those flags whenever you refresh. Update the source/date comment on the file's first line too.
 2. **Bump the slate salt** for each league you changed, in `app.js`:
    ```js
    var SALT = { nba: '-r6', nfl: '-r8' };   // e.g. change '-r6' to '-r7'
