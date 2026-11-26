@@ -13,6 +13,19 @@ A daily NBA and NFL trivia game: guess where pro players went to college (or whi
 | `tools/check-data.js` | Validates the data files after a refresh |
 | `.nojekyll` | Tells GitHub Pages to serve the files as-is |
 
+## Difficulty: Rookie and Veteran
+
+A toggle under NBA / NFL switches difficulty. New visitors start on **Rookie**, and each league remembers the last choice.
+
+| | Rookie (easier) | Veteran (harder) |
+| --- | --- | --- |
+| NBA Where'd He Go / Connections | Starters only | Anyone on a roster |
+| NFL Where'd He Go | 2 QBs, then 3 RB/WR/TE (all flagged) | QB, 2 RB/WR/TE, 1 OL or defense, 1 wildcard (any flagged non-OL, or a kicker/punter/long snapper) |
+| NFL Connections | Flagged QBs, RBs, WRs, TEs | Any flagged player |
+| Pipeline | Same round for both | Same round for both |
+
+Each difficulty has its own daily puzzles and saved progress. The streak is per league, and playing either difficulty counts.
+
 ## Run it locally
 
 You need [Node.js](https://nodejs.org) (any recent version). From this folder:
@@ -41,11 +54,11 @@ Each league's data file is one JavaScript array, one player per row:
 | 3. kind | `"c"` college, `"n"` country, `"x"` for the place `"No College"` (prep-to-pro, G League Ignite, etc.) |
 | 4. position | NBA: `G` `F` `C`. NFL: `QB` `RB` `WR` `TE` `OL` `DL` `LB` `DB` `ST` |
 | 5. team | Current team's full name, or `""` for a free agent (the team line is then hidden) |
-| 6. starter (NFL only) | `1` to mark a depth-chart player, otherwise leave it off. **QB:** each team's QB1 and QB2. **WR:** the first-string player at each of the team's three WR spots (3 per team). **RB/TE:** first and second string. **OL/DL/LB/DB:** starters. NFL "Where'd He Go" only picks flagged players, except kickers/punters/long snappers (`ST`), who can appear in the 5th "wildcard" slot. NFL Connections only shows flagged players. Pipeline counts everyone. |
+| 6. starter | `1` to mark a starter, otherwise leave it off. **NBA:** the 5 players in each team's starting lineup (150 total); Rookie mode only uses these in Where'd He Go and Connections. **NFL:** depth-chart players, as follows. **QB:** each team's QB1 and QB2. **WR:** the first-string player at each of the team's three WR spots (3 per team). **RB/TE:** first and second string. **OL/DL/LB/DB:** starters. NFL "Where'd He Go" only picks flagged players, except kickers/punters/long snappers (`ST`), who can appear in the 5th "wildcard" slot. NFL Connections only shows flagged players. Pipeline counts everyone. |
 
 ### Steps
 
-1. **Update the data file(s).** Edit rows by hand, or regenerate the whole array from your source. The current pools came from Basketball Reference (NBA) and lineups.com rosters plus ESPN depth charts (NFL), with QB and WR flags from Ourlads (https://www.ourlads.com/nfldepthcharts/depthchartpos/QB and .../depthchartpos/WR). Starting QBs and WRs change often with injuries, so re-check those flags whenever you refresh. Update the source/date comment on the file's first line too.
+1. **Update the data file(s).** Edit rows by hand, or regenerate the whole array from your source. The current pools came from Basketball Reference (NBA, with starting lineups from https://www.espn.com/nba/depth) and lineups.com rosters plus ESPN depth charts (NFL), with QB and WR flags from Ourlads (https://www.ourlads.com/nfldepthcharts/depthchartpos/QB and .../depthchartpos/WR). Starting QBs and WRs change often with injuries, so re-check those flags whenever you refresh. Update the source/date comment on the file's first line too.
 2. **Bump the slate salt** for each league you changed, in `app.js`:
    ```js
    var SALT = { nba: '-r6', nfl: '-r8' };   // e.g. change '-r6' to '-r7'

@@ -1,10 +1,10 @@
 (function () {
-  var H = window.HD, P, ALL_PLACES, A, B, C, LG = 'nba';
+  var H = window.HD, P, ALL_PLACES, A, B, C, LG = 'nba', LV = 'rookie'; // LV: difficulty, 'rookie' (default) or 'veteran'
   var KEY = H.dateKey();
-  var VER = 'v6'; // save-format version: changing it wipes every player's saved results and streaks
+  var VER = 'v7'; // save-format version: changing it wipes every player's saved results and streaks
   // Slate salt per league. It seeds the daily picks, so bumping one (e.g. '-r3' -> '-r4') gives that league a new set
   // for today and drops any results saved against the old set. Bump it whenever you change that league's data file.
-  var SALT = { nba: '-r9', nfl: '-r12' };
+  var SALT = { nba: '-r10', nfl: '-r13' };
   var S = { days: {}, v: VER };
   var mode = 'a';
   var run = null; // live Pipeline run: {end, timer, found:[]}
@@ -14,16 +14,19 @@
     LG = lg; S.lg = lg;
     P = lg === 'nfl' ? window.PLAYERS_NFL : window.PLAYERS;
     ALL_PLACES = Object.keys(H.groupBy(P)).sort();
-    var k = KEY + SALT[lg] + (lg === 'nfl' ? '-nfl' : '');
-    A = lg === 'nfl' ? H.dailyPlayersNFL(P, k) : H.dailyPlayers(P, k, 5);
-    B = H.dailyConnections(P, k, 3, lg); C = H.dailyPipeline(P, k, lg);
+    LV = (S.lv && S.lv[lg]) || 'rookie'; // each league remembers its own difficulty
+    var k = KEY + SALT[lg] + (lg === 'nfl' ? '-nfl' : ''), kl = k + '-' + LV;
+    // Where'd He Go and Connections differ by difficulty; Pipeline is shared by both.
+    A = lg === 'nfl' ? H.dailyPlayersNFL(P, kl, LV) : H.dailyPlayers(P, kl, 5, LV);
+    B = H.dailyConnections(P, kl, 3, lg, LV); C = H.dailyPipeline(P, k, lg);
     document.documentElement.setAttribute('data-league', lg); // switches the color scheme (see index.html)
     var h1 = document.getElementById('brand'); if (h1) h1.innerHTML = brand() + ' <span>Daily</span>';
     document.title = brand() + ' Daily';
   }
   function dk(date) { return (date || KEY) + (LG === 'nfl' ? '|nfl5' : ''); }
   function brand() { return LG === 'nfl' ? 'Gridiron' : 'Hardwood'; }
-  function title() { return brand() + ' Daily ' + LG.toUpperCase() + ' ' + KEY; }
+  function lvName() { return LV === 'rookie' ? 'Rookie' : 'Veteran'; }
+  function title(withLevel) { return brand() + ' Daily ' + LG.toUpperCase() + (withLevel ? ' · ' + lvName() : '') + ' ' + KEY; }
 
   // Progress lives only in this browser's localStorage (key 'hd1').
   function save() { S.v = VER; try { localStorage.setItem('hd1', JSON.stringify(S)); } catch (e) {} }
@@ -31,13 +34,22 @@
   function day() {
     var k = dk();
     if (S.days[k] && S.days[k].slate !== SALT[LG]) delete S.days[k]; // new slate: drop results saved against the old one
-    return S.days[k] || (S.days[k] = { slate: SALT[LG], a: { i: 0, tries: 0, res: [], done: false }, b: { i: 0, tries: 0, res: [], done: false }, c: { found: [], done: false } });
+    return S.days[k] || (S.days[k] = { slate: SALT[LG], c: { found: [], done: false } });
+  }
+  // Where'd He Go (a) and Connections (b) progress for the current difficulty.
+  function cur() {
+    var d = day();
+    return d[LV] || (d[LV] = { a: { i: 0, tries: 0, res: [], done: false }, b: { i: 0, tries: 0, res: [], done: false } });
+  }
+  function gameDone(rec, m) { // m: 'a' | 'b' | 'c'
+    if (m === 'c') return !!(rec.c && rec.c.done);
+    return ['rookie', 'veteran'].some(function (lv) { return rec[lv] && rec[lv][m].done; });
   }
   function streak() {
     var d = new Date(), n = 0, first = true;
     for (var i = 0; i < 400; i++) {
       var rec = S.days[dk(H.dateKey(d))];
-      var played = rec && (rec.a.done || rec.b.done || rec.c.done);
+      var played = rec && (gameDone(rec, 'a') || gameDone(rec, 'b') || gameDone(rec, 'c')); // either difficulty counts
       if (played) n++; else if (!first) break;
       first = false; d.setDate(d.getDate() - 1);
     }
@@ -61,15 +73,15 @@
     };
   }
   function shareText(m) {
-    var d = day();
-    if (m === 'a') return title() + "\nWhere'd He Go " + d.a.res.map(function (x) { return EMO[x]; }).join('');
-    if (m === 'b') return title() + '\nConnections ' + d.b.res.map(function (x) { return EMO[x]; }).join('');
+    var d = day(), g = cur();
+    if (m === 'a') return title(true) + "\nWhere'd He Go " + g.a.res.map(function (x) { return EMO[x]; }).join('');
+    if (m === 'b') return title(true) + '\nConnections ' + g.b.res.map(function (x) { return EMO[x]; }).join('');
     return title() + '\nPipeline: ' + C.place + ' ' + d.c.found.length + '/' + C.pool.length;
   }
 
   /* ---------- Mode A ---------- */
   function renderA() {
-    var s = day().a, el = $('panel');
+    var s = cur().a, el = $('panel');
     if (s.done) {
       var score = s.res.filter(function (x) { return x !== 'r'; }).length;
       el.innerHTML = '<div class="rule"><span>Final</span><span>' + score + ' of ' + A.length + '</span></div>' + pips(s.res, -1, A.length) +
@@ -153,7 +165,7 @@
     return function () { return picked; };
   }
   function finishA(p, code, win) {
-    var s = day().a;
+    var s = cur().a;
     s.res.push(code); s.tries = 0; s.i++;
     if (s.i >= A.length) s.done = true;
     save(); head();
@@ -167,7 +179,7 @@
 
   /* ---------- Mode B ---------- */
   function renderB() {
-    var s = day().b, el = $('panel');
+    var s = cur().b, el = $('panel');
     if (s.done) {
       var score = s.res.filter(function (x) { return x !== 'r'; }).length;
       el.innerHTML = '<div class="rule"><span>Final</span><span>' + score + ' of 3</span></div>' + pips(s.res, -1, 3) +
@@ -194,7 +206,7 @@
     };
   }
   function endB(code, win) {
-    var s = day().b, q = B[s.i];
+    var s = cur().b, q = B[s.i];
     s.res.push(code); s.tries = 0; s.i++;
     if (s.i >= B.length) s.done = true;
     save(); head();
@@ -223,7 +235,7 @@
       // The school/country and its size stay hidden until the clock starts, so nobody can plan ahead.
       el.innerHTML = '<div class="rule"><span>Pipeline</span><span>60 seconds</span></div>' +
         '<div class="big">Mystery ' + (LG === 'nfl' ? 'school' : 'school or country') + '</div>' +
-        '<p class="sub">Name as many current ' + LG.toUpperCase() + ' players as you can who came from today\'s mystery place. It\'s revealed when you start the clock. Pick each name from the list. You get one run a day, and the clock keeps running if you leave.</p>' +
+        '<p class="sub">Name as many ' + LG.toUpperCase() + ' players from here as you can. One try a day, and the clock keeps running if you leave.</p>' +
         '<button class="btn" id="start">Start the clock</button>';
       $('start').onclick = startC; return;
     }
@@ -276,16 +288,16 @@
 
   /* ---------- Share all ---------- */
   function allText() {
-    var d = day(), L = [title()];
-    L.push("Where'd He Go " + (d.a.done ? d.a.res.map(function (x) { return EMO[x]; }).join('') : '-'));
-    L.push('Connections ' + (d.b.done ? d.b.res.map(function (x) { return EMO[x]; }).join('') : '-'));
+    var d = day(), g = cur(), L = [title(true)];
+    L.push("Where'd He Go " + (g.a.done ? g.a.res.map(function (x) { return EMO[x]; }).join('') : '-'));
+    L.push('Connections ' + (g.b.done ? g.b.res.map(function (x) { return EMO[x]; }).join('') : '-'));
     L.push('Pipeline ' + (d.c.done ? C.place + ' ' + d.c.found.length + '/' + C.pool.length : '-'));
     return L.join('\n');
   }
   function renderAll() {
-    var d = day(), box = $('all');
-    if (!(d.a.done || d.b.done || d.c.done)) { box.innerHTML = ''; return; }
-    var t = allText(), left = [d.a, d.b, d.c].filter(function (x) { return !x.done; }).length;
+    var d = day(), g = cur(), box = $('all');
+    if (!(g.a.done || g.b.done || d.c.done)) { box.innerHTML = ''; return; }
+    var t = allText(), left = [g.a, g.b, d.c].filter(function (x) { return !x.done; }).length;
     box.innerHTML = '<div class="result"><h2>All of today</h2><pre>' + esc(t) + '</pre>' +
       '<button class="btn" id="allcopy">Copy all results</button> <span class="msg" id="allmsg"></span>' +
       (left ? '<div class="sub" style="margin:8px 0 0">' + left + ' of 3 still to play. A dash means not played yet.</div>' : '') + '</div>';
@@ -299,20 +311,23 @@
   /* ---------- Shell ---------- */
   function head() {
     renderAll();
-    var d = day();
+    var d = day(), g = cur();
     $('meta').innerHTML = LG.toUpperCase() + ' · ' + KEY + '<br>Streak <b>' + streak() + '</b>';
     Array.prototype.forEach.call(document.querySelectorAll('#league button'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-lg') === LG ? 'true' : 'false'); });
+    Array.prototype.forEach.call(document.querySelectorAll('#level button'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-lv') === LV ? 'true' : 'false'); });
     note();
     var tabs = document.querySelectorAll('#tabs button');
     Array.prototype.forEach.call(tabs, function (b) {
       var m = b.getAttribute('data-m');
       b.setAttribute('aria-selected', m === mode ? 'true' : 'false');
-      b.className = d[m].done ? 'done' : '';
+      b.className = (m === 'c' ? d.c : g[m]).done ? 'done' : '';
     });
   }
   function note() {
     var n = $('note');
-    n.textContent = 'Pool: ' + P.length + ' current ' + LG.toUpperCase() + ' players (' + (LG === 'nfl' ? 'full rosters incl. practice squads, Nov 2026' : '2026-27 rosters') + ') across ' + ALL_PLACES.length + ' schools and countries. A new set unlocks at local midnight.';
+    n.textContent = 'Pool: ' + P.length + ' current ' + LG.toUpperCase() + ' players (' + (LG === 'nfl' ? 'full rosters incl. practice squads, Nov 2026' : '2026-27 rosters') + ') across ' + ALL_PLACES.length + ' schools and countries. ' +
+      (LV === 'rookie' ? (LG === 'nfl' ? 'Rookie: only starting QBs, RBs, WRs and TEs. ' : 'Rookie: only starting fives. ') : 'Veteran: full rosters. ') +
+      'Pipeline is the same in both. A new set unlocks at local midnight.';
     var rb = document.createElement('button');
     rb.className = 'btn alt'; rb.textContent = 'Reset today'; rb.style.cssText = 'margin-left:8px;padding:4px 10px;font-size:12px';
     rb.onclick = function () { if (run) { clearInterval(run.timer); run = null; } delete S.days[dk()]; day(); save(); render(); };
@@ -328,6 +343,14 @@
         var lg = b.getAttribute('data-lg'); if (lg === LG) return;
         if (run) { clearInterval(run.timer); run = null; }
         setLeague(lg); day(); save(); render();
+      };
+    });
+    // Switching difficulty keeps any live Pipeline run going: Pipeline is shared by both levels.
+    Array.prototype.forEach.call(document.querySelectorAll('#level button'), function (b) {
+      b.onclick = function () {
+        var lv = b.getAttribute('data-lv'); if (lv === LV) return;
+        S.lv = S.lv || {}; S.lv[LG] = lv;
+        setLeague(LG); save(); render();
       };
     });
     Array.prototype.forEach.call(document.querySelectorAll('#tabs button'), function (b) {

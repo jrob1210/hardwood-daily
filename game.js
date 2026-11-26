@@ -51,16 +51,22 @@
     players.forEach(function (p) { (g[p[1]] = g[p[1]] || []).push(p); });
     return g;
   }
+  // Two difficulty levels. 'rookie' (default): only well-known players. 'veteran': the full game.
+  // NBA rookie = starting fives only (flag p[5]); NFL rookie = QBs and skill players only.
+  function starters(players) { return players.filter(function (p) { return p[5]; }); }
   // Mode A: five players, fixed order for the day.
-  function dailyPlayers(players, key, n) {
-    return shuffle(players, rng(hash('A' + key))).slice(0, n || 5);
+  function dailyPlayers(players, key, n, level) {
+    return shuffle(level === 'rookie' ? starters(players) : players, rng(hash('A' + key))).slice(0, n || 5);
   }
-  // NFL Mode A: five players. 1 QB; 2-3 skill (RB/WR/TE); 4 an OL or defensive player (position group picked first, evenly: OL/DL/LB/DB); 5 wildcard (QB, skill, defense or special teams; no OL). Everyone except special teams must carry the depth-chart flag p[5] (first or second string).
+  // NFL Mode A, veteran: 1 QB; 2-3 skill (RB/WR/TE); 4 an OL or defensive player (position group picked first, evenly: OL/DL/LB/DB); 5 wildcard (QB, skill, defense or special teams; no OL).
+  // NFL Mode A, rookie: 2 QBs, then 3 skill players.
+  // Everyone except special teams must carry the depth-chart flag p[5].
   var NFL_SLOTS = [['QB'], ['RB', 'WR', 'TE'], ['RB', 'WR', 'TE'], ['OL', 'DL', 'LB', 'DB'], ['QB', 'RB', 'WR', 'TE', 'DL', 'LB', 'DB', 'ST']];
-  function dailyPlayersNFL(players, key) {
-    var r = rng(hash('A' + key)), used = {}, out = [];
-    NFL_SLOTS.forEach(function (allowed, slot) {
-      if (slot === 3) allowed = [allowed[Math.floor(r() * allowed.length)]];
+  var NFL_SLOTS_ROOKIE = [['QB'], ['QB'], ['RB', 'WR', 'TE'], ['RB', 'WR', 'TE'], ['RB', 'WR', 'TE']];
+  function dailyPlayersNFL(players, key, level) {
+    var r = rng(hash('A' + key)), used = {}, out = [], rookie = level === 'rookie';
+    (rookie ? NFL_SLOTS_ROOKIE : NFL_SLOTS).forEach(function (allowed, slot) {
+      if (!rookie && slot === 3) allowed = [allowed[Math.floor(r() * allowed.length)]];
       var pool = shuffle(players.filter(function (p) { return allowed.indexOf(p[3]) >= 0 && !used[p[0]] && (!/^(QB|RB|WR|TE|OL|DL|LB|DB)$/.test(p[3]) || p[5]); }), r);
       var pick = pool[0];
       used[pick[0]] = 1; out.push(pick);
@@ -68,10 +74,13 @@
     return out;
   }
   // Mode B: three puzzles. Each has two players sharing a place.
-  // NFL only shows depth-chart players (flag p[5]) so the pairs are recognisable; NBA uses everyone.
-  function dailyConnections(players, key, n, lg) {
-    var src = lg === 'nfl' ? players.filter(function (p) { return p[5]; }) : players;
-    var g = groupBy(src), r = rng(hash('B' + key)), min = lg === 'nfl' ? 2 : 3;
+  //   NBA rookie: starters.            NBA veteran: anyone.
+  //   NFL rookie: QB/RB/WR/TE starters. NFL veteran: any depth-chart player (flag p[5]).
+  function dailyConnections(players, key, n, lg, level) {
+    var src = players;
+    if (lg === 'nfl') src = starters(players).filter(function (p) { return level !== 'rookie' || /^(QB|RB|WR|TE)$/.test(p[3]); });
+    else if (level === 'rookie') src = starters(players);
+    var g = groupBy(src), r = rng(hash('B' + key)), min = src === players ? 3 : 2;
     var places = Object.keys(g).filter(function (k) { return g[k].length >= min; }).sort();
     var picked = shuffle(places, r).slice(0, n || 3);
     return picked.map(function (place) {
@@ -151,6 +160,6 @@
     return c;
   }
   root.HD = { hash: hash, rng: rng, shuffle: shuffle, norm: norm, sameAnswer: sameAnswer, dateKey: dateKey,
-    groupBy: groupBy, dailyPlayers: dailyPlayers, dailyPlayersNFL: dailyPlayersNFL, NFL_SLOTS: NFL_SLOTS, dailyConnections: dailyConnections, choices: choices,
+    groupBy: groupBy, dailyPlayers: dailyPlayers, dailyPlayersNFL: dailyPlayersNFL, NFL_SLOTS: NFL_SLOTS, NFL_SLOTS_ROOKIE: NFL_SLOTS_ROOKIE,dailyConnections: dailyConnections, choices: choices,
     dailyPipeline: dailyPipeline, PIPELINE_MIN: PIPELINE_MIN, matchPlayer: matchPlayer, hintFor: hintFor, suggest: suggest, suggestNames: suggestNames };
 })(typeof window !== 'undefined' ? window : globalThis);
