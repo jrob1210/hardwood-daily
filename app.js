@@ -116,7 +116,7 @@
   }
   // After a wrong first guess the text box is swapped for four buttons (see H.choices).
   function guessForm() {
-    return '<form class="row" id="f" autocomplete="off"><div class="combo"><input type="text" id="g" role="combobox" aria-expanded="false" aria-controls="lb" aria-autocomplete="list" placeholder="Start typing your answer" aria-label="Your answer"><ul id="lb" class="lb" role="listbox" hidden></ul></div><button class="btn" id="go" disabled>Guess</button></form>';
+    return '<form class="row" id="f" autocomplete="off"><div class="combo"><input type="text" id="g" role="combobox" aria-expanded="false" aria-controls="lb" aria-autocomplete="list" placeholder="' + (LG === 'nba' ? 'College, country or No College' : 'Start typing your answer') + '" aria-label="Your answer"><ul id="lb" class="lb" role="listbox" hidden></ul></div><button class="btn" id="go" disabled>Guess</button></form>';
   }
   // No conference/region hint here: with four choices it usually gives the answer away.
   // (H.hintFor and the HINTS table in game.js are kept in case hints come back.)
@@ -331,7 +331,8 @@
   // "How to play" text for the current league. The roster line is counted from the data so it never goes stale.
   function howTo() {
     var nfl = LG === 'nfl', set = function (id, t) { var el = $(id); if (el) el.textContent = t; };
-    set('howA', nfl ? 'or, rarely, his home country' : 'or his home country if he skipped college');
+    set('howA', nfl ? 'Name the college each one last attended, or, rarely, his home country.'
+      : 'Name the college each one last attended. If he skipped college, it\'s his home country, or No College if he\'s American (like LeBron).');
     set('howB', nfl ? 'a college' : 'a school or country');
     set('howC', nfl ? 'A mystery school' : 'A mystery school or country (or "No College")');
     set('howLv', nfl ? 'starting QBs, RBs, WRs and TEs' : 'starters');

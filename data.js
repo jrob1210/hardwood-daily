@@ -452,7 +452,7 @@ window.PLAYERS = [
 ["Alex Karaban", "UConn", "c", "F", "Sacramento Kings"],
 ["Jonathan Mogbo", "San Francisco", "c", "F", "Sacramento Kings"],
 ["Mason Plumlee", "Duke", "c", "C", "Sacramento Kings"],
-["Killian Hayes", "No College", "x", "G", "Sacramento Kings"],
+["Killian Hayes", "France", "n", "G", "Sacramento Kings"],
 ["Ben Simmons", "LSU", "c", "G", "Sacramento Kings"],
 ["Maxime Raynaud", "Stanford", "c", "C", "Sacramento Kings"],
 ["Sean Pedulla", "Ole Miss", "c", "G", "Sacramento Kings"],

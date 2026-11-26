@@ -64,6 +64,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 .chip{display:inline-block;font:600 12px var(--mono);border:1px solid var(--ink);padding:1px 7px;margin-right:6px}
 .row{display:flex;gap:8px}
 input[type=text]{flex:1;min-width:0;font:400 17px var(--body);padding:12px;border:2px solid var(--ink);background:var(--card);color:var(--ink);border-radius:0}
+input[type=text]::placeholder{font-size:15px} /* so the NBA hint fits on phones; typed text stays 17px */
 .combo{position:relative;flex:1;min-width:0;display:flex}
 .combo input{width:100%}
 .lb{position:absolute;left:0;right:0;top:100%;z-index:5;margin:0;padding:0;list-style:none;background:var(--card);border:2px solid var(--ink);border-top:0;max-height:260px;overflow-y:auto}
@@ -118,7 +119,7 @@ input[type=text]{flex:1;min-width:0;font:400 17px var(--body);padding:12px;borde
   <details class="about">
     <summary>How to play</summary>
     <!-- The id'd spans change with the league (see howTo() in app.js); the text here is the NBA version. -->
-    <p><b>Where'd He Go:</b> Five players. Name the college each one last attended, <span id="howA">or his home country if he skipped college</span>. Miss and you get four choices.</p>
+    <p><b>Where'd He Go:</b> Five players. <span id="howA">Name the college each one last attended. If he skipped college, it's his home country, or No College if he's American (like LeBron).</span> Miss and you get four choices.</p>
     <p><b>Connections:</b> Two players share <span id="howB">a school or country</span>. Name it. Three puzzles a day.</p>
     <p><b>Pipeline:</b> <span id="howC">A mystery school or country</span> is revealed when you start the clock. Name as many current players from there as you can in 60 seconds.</p>
     <p><b>Rookie or Veteran:</b> Rookie sticks to <span id="howLv">starters</span>. Veteran uses full rosters. Pipeline is the same in both.</p>
@@ -128,9 +129,9 @@ input[type=text]{flex:1;min-width:0;font:400 17px var(--body);padding:12px;borde
   <div class="themesw"><span>Theme</span><span class="lvl" id="theme" role="group" aria-label="Theme"><button type="button" data-t="light" aria-pressed="false">Light</button><span aria-hidden="true">|</span><button type="button" data-t="dark" aria-pressed="false">Dark</button><span aria-hidden="true">|</span><button type="button" data-t="auto" aria-pressed="true">Auto</button></span></div>
 </div>
 <!-- ?v= makes browsers fetch matching copies after a deploy. Change it (any new value) whenever you push changes. -->
-<script src="data.js?v=2026-11-26g"></script>
-<script src="data_nfl.js?v=2026-11-26g"></script>
-<script src="game.js?v=2026-11-26g"></script>
-<script src="app.js?v=2026-11-26g"></script>
+<script src="data.js?v=2026-11-26i"></script>
+<script src="data_nfl.js?v=2026-11-26i"></script>
+<script src="game.js?v=2026-11-26i"></script>
+<script src="app.js?v=2026-11-26i"></script>
 </body>
 </html>
