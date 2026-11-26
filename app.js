@@ -22,6 +22,7 @@
     document.documentElement.setAttribute('data-league', lg); // switches the color scheme (see index.html)
     var h1 = document.getElementById('brand'); if (h1) h1.innerHTML = brand() + ' <span>Daily</span>';
     document.title = brand() + ' Daily';
+    howTo();
   }
   function dk(date) { return (date || KEY) + (LG === 'nfl' ? '|nfl5' : ''); }
   function brand() { return LG === 'nfl' ? 'Gridiron' : 'Hardwood'; }
@@ -327,16 +328,17 @@
     });
   }
   function render() { head(); (mode === 'a' ? renderA : mode === 'b' ? renderB : renderC)(); }
-  // "How to play" roster line, counted from the data files so it never goes stale.
-  function poolLine() {
-    var el = $('pool'); if (!el) return;
-    var n = function (x) { return x.toLocaleString('en-US'); };
-    var places = function (list) { return Object.keys(H.groupBy(list)).length; };
-    el.textContent = 'Current rosters as of November 2026: ' + n(window.PLAYERS.length) + ' NBA players from ' + places(window.PLAYERS) +
-      ' schools and countries, and ' + n(window.PLAYERS_NFL.length) + ' NFL players from ' + places(window.PLAYERS_NFL) + '.';
+  // "How to play" text for the current league. The roster line is counted from the data so it never goes stale.
+  function howTo() {
+    var nfl = LG === 'nfl', set = function (id, t) { var el = $(id); if (el) el.textContent = t; };
+    set('howA', nfl ? 'or, rarely, his home country' : 'or his home country if he skipped college');
+    set('howB', nfl ? 'a college' : 'a school or country');
+    set('howC', nfl ? 'A mystery school' : 'A mystery school or country (or "No College")');
+    set('howLv', nfl ? 'starting QBs, RBs, WRs and TEs' : 'starters');
+    set('pool', 'Current ' + LG.toUpperCase() + ' rosters as of November 2026: ' + P.length.toLocaleString('en-US') + ' players from ' +
+      ALL_PLACES.length + ' schools and countries.');
   }
   function start() {
-    poolLine();
     load();
     setLeague(S.lg === 'nfl' ? 'nfl' : 'nba');
     day(); save();

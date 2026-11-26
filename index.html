@@ -111,18 +111,19 @@ input[type=text]{flex:1;min-width:0;font:400 17px var(--body);padding:12px;borde
   <section id="all" aria-label="Share all results"></section>
   <details class="about">
     <summary>How to play</summary>
-    <p><b>Where'd He Go:</b> Five players. Name the college each one last attended, or his home country if he skipped college. Miss and you get four choices.</p>
-    <p><b>Connections:</b> Two players share a school or country. Name it. Three puzzles a day.</p>
-    <p><b>Pipeline:</b> A mystery school is revealed when you start the clock (in the NBA it can also be a country, or "No College"). Name as many current players from there as you can in 60 seconds.</p>
-    <p><b>Rookie or Veteran:</b> Rookie sticks to starters (NBA) or QBs and skill players (NFL). Veteran uses full rosters. Pipeline is the same in both.</p>
+    <!-- The id'd spans change with the league (see howTo() in app.js); the text here is the NBA version. -->
+    <p><b>Where'd He Go:</b> Five players. Name the college each one last attended, <span id="howA">or his home country if he skipped college</span>. Miss and you get four choices.</p>
+    <p><b>Connections:</b> Two players share <span id="howB">a school or country</span>. Name it. Three puzzles a day.</p>
+    <p><b>Pipeline:</b> <span id="howC">A mystery school or country</span> is revealed when you start the clock. Name as many current players from there as you can in 60 seconds.</p>
+    <p><b>Rookie or Veteran:</b> Rookie sticks to <span id="howLv">starters</span>. Veteran uses full rosters. Pipeline is the same in both.</p>
     <p>🟩 first try · 🟨 got it from the choices · 🟥 missed</p>
     <p>New puzzles every day at midnight. <span id="pool">Current rosters as of November 2026.</span></p>
   </details>
 </div>
 <!-- ?v= makes browsers fetch matching copies after a deploy. Change it (any new value) whenever you push changes. -->
-<script src="data.js?v=2026-11-26d"></script>
-<script src="data_nfl.js?v=2026-11-26d"></script>
-<script src="game.js?v=2026-11-26d"></script>
-<script src="app.js?v=2026-11-26d"></script>
+<script src="data.js?v=2026-11-26e"></script>
+<script src="data_nfl.js?v=2026-11-26e"></script>
+<script src="game.js?v=2026-11-26e"></script>
+<script src="app.js?v=2026-11-26e"></script>
 </body>
 </html>
