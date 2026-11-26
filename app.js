@@ -98,9 +98,10 @@
   function guessForm() {
     return '<form class="row" id="f" autocomplete="off"><div class="combo"><input type="text" id="g" role="combobox" aria-expanded="false" aria-controls="lb" aria-autocomplete="list" placeholder="Start typing your answer" aria-label="Your answer"><ul id="lb" class="lb" role="listbox" hidden></ul></div><button class="btn" id="go" disabled>Guess</button></form>';
   }
+  // No conference/region hint here: with four choices it usually gives the answer away.
+  // (H.hintFor and the HINTS table in game.js are kept in case hints come back.)
   function missMsg(place, wrong) {
-    var hint = H.hintFor(place, LG);
-    return (wrong ? 'Not ' + wrong + '. ' : 'Not it. ') + (hint ? 'Hint: ' + hint + '. ' : '') + 'Pick one of these four.';
+    return (wrong ? 'Not ' + wrong + '. ' : 'Not it. ') + 'Pick one of these four.';
   }
   function choiceButtons(opts) {
     return '<div class="opts" id="opts">' + opts.map(function (o) { return '<button type="button" class="btn" data-o="' + esc(o) + '">' + esc(o) + '</button>'; }).join('') + '</div>';

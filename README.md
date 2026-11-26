@@ -6,7 +6,7 @@ A daily NBA and NFL trivia game: guess where pro players went to college (or whi
 | --- | --- |
 | `index.html` | Page shell and all CSS |
 | `app.js` | UI, saving, league switching |
-| `game.js` | Pure game logic: daily picks, answer matching, hints |
+| `game.js` | Pure game logic: daily picks, answer matching, multiple-choice options. Also holds a `HINTS` table (conference/region per place) that the game doesn't currently show |
 | `data.js` | NBA player pool (`window.PLAYERS`) |
 | `data_nfl.js` | NFL player pool (`window.PLAYERS_NFL`) |
 | `tools/serve.js` | Local dev server (not used by the live site) |
@@ -46,25 +46,19 @@ Each league's data file is one JavaScript array, one player per row:
 ### Steps
 
 1. **Update the data file(s).** Edit rows by hand, or regenerate the whole array from your source. The current pools came from Basketball Reference (NBA) and lineups.com rosters plus ESPN depth charts (NFL), with QB1/QB2 flags from Ourlads (https://www.ourlads.com/nfldepthcharts/depthchartpos/QB). Starting QBs change often with injuries, so re-check those flags whenever you refresh. Update the source/date comment on the file's first line too.
-2. **Add hints for new places.** If a school or country appears for the first time, add it to the `HINTS` object in `game.js`. Copy the style of the existing entries:
-   - `"Gonzaga": "College conference: Pac-12"`
-   - `"Serbia": "A country in Europe"`
-   - Schools whose football and basketball conferences differ use `"College conference: Horizon League (Missouri Valley in football)"`.
-
-   A place without a hint still works: its hint falls back to "Starts with Y · 9 characters".
-3. **Bump the slate salt** for each league you changed, in `app.js`:
+2. **Bump the slate salt** for each league you changed, in `app.js`:
    ```js
-   var SALT = { nba: '-r3', nfl: '-r5' };   // e.g. change '-r3' to '-r4'
+   var SALT = { nba: '-r6', nfl: '-r8' };   // e.g. change '-r6' to '-r7'
    ```
    The daily picks are seeded from the date plus this salt. Bumping it makes today's puzzles come from the new pool and clears anyone's half-finished game for today, so saved answers don't point at the wrong questions. Streaks and past days are kept. If you skip this step, today's puzzles still change, but anyone mid-game keeps progress saved against the old questions. Tomorrow's set is unaffected either way.
-4. **Update the footer note** if needed. In `app.js`, `note()` describes each pool (e.g. "2026-27 rosters", "full rosters incl. practice squads, Nov 2026").
-5. **Check the data:**
+3. **Update the footer note** if needed. In `app.js`, `note()` describes each pool (e.g. "2026-27 rosters", "full rosters incl. practice squads, Nov 2026").
+4. **Check the data:**
    ```
    node tools/check-data.js
    ```
-   It flags malformed rows, bad kinds or positions, places marked as both college and country, places missing hints, and any day in the next year where a game couldn't be built. Errors (exit code 1) must be fixed. Warnings are fine to ship.
-6. **Play it locally** (`node tools/serve.js`) in both leagues.
-7. **Publish:**
+   It flags malformed rows, bad kinds or positions, places marked as both college and country, and any day in the next year where a game couldn't be built. Errors (exit code 1) must be fixed. Warnings are fine to ship.
+5. **Play it locally** (`node tools/serve.js`) in both leagues.
+6. **Publish:**
    ```
    git add -A
    git commit -m "Refresh rosters"

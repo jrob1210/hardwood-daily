@@ -44,8 +44,6 @@ for (const L of leagues) {
   const kinds = {};
   places.forEach((pl) => groups[pl].forEach((p) => { (kinds[pl] = kinds[pl] || new Set()).add(p[2]); }));
   places.filter((pl) => kinds[pl].size > 1).forEach((pl) => err(`"${pl}" is marked both college and country; pick one`));
-  const noHint = places.filter((pl) => /^Starts with /.test(H.hintFor(pl, L.lg)));
-  if (noHint.length) warn(`${noHint.length} place(s) have no hint in game.js HINTS (falls back to "Starts with..."): ${noHint.slice(0, 15).join(', ')}${noHint.length > 15 ? ', ...' : ''}`);
   const connPlaces = places.filter((pl) => groups[pl].length >= 3).length;
   const pipeMin = H.PIPELINE_MIN[L.lg];
   const pipePlaces = places.filter((pl) => groups[pl].length >= pipeMin).length;
