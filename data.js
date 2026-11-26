@@ -133,7 +133,7 @@ window.PLAYERS = [
 ["Max Christie", "Michigan State", "c", "G", "Dallas Mavericks"],
 ["Caleb Martin", "Nevada", "c", "G", "Dallas Mavericks", 1],
 ["Marcus Sasser", "Houston", "c", "G", "Dallas Mavericks"],
-["Moussa Cissé", "Memphis", "c", "C", "Dallas Mavericks"],
+["Moussa Cissé", "Oklahoma State", "c", "C", "Dallas Mavericks"],
 ["Tobi Lawal", "Virginia Tech", "c", "F", "Dallas Mavericks"],
 ["Santi Aldama", "Loyola Maryland", "c", "F", "Dallas Mavericks"],
 ["Jett Howard", "Michigan", "c", "F", "Dallas Mavericks"],
