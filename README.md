@@ -15,7 +15,7 @@ A daily NBA and NFL trivia game: guess where pro players went to college (or whi
 
 ## Difficulty: Rookie and Veteran
 
-A toggle under NBA / NFL switches difficulty. New visitors start on **Rookie**, and each league remembers the last choice.
+A small "Rookie | Veteran" switch on the right of the puzzle header (in Where'd He Go and Connections) changes difficulty. New visitors start on **Rookie**, and each league remembers the last choice.
 
 | | Rookie (easier) | Veteran (harder) |
 | --- | --- | --- |

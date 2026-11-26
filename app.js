@@ -84,13 +84,13 @@
     var s = cur().a, el = $('panel');
     if (s.done) {
       var score = s.res.filter(function (x) { return x !== 'r'; }).length;
-      el.innerHTML = '<div class="rule"><span>Final</span><span>' + score + ' of ' + A.length + '</span></div>' + pips(s.res, -1, A.length) +
+      el.innerHTML = '<div class="rule"><span>Final · ' + score + ' of ' + A.length + '</span>' + lvSwitch() + '</div>' + pips(s.res, -1, A.length) +
         A.map(function (p, i) { return '<p><span class="chip">' + p[3] + '</span>' + esc(p[0]) + ' · <b>' + esc(p[1]) + '</b> ' + EMO[s.res[i]] + '</p>'; }).join('') +
         shareBlock(shareText('a'));
       bindCopy(shareText('a')); return;
     }
     var p = A[s.i], mc = s.tries === 1;
-    el.innerHTML = '<div class="rule"><span>Player ' + (s.i + 1) + ' of ' + A.length + '</span><span>' + (mc ? 'Last guess' : '2 guesses left') + '</span></div>' + pips(s.res, s.i, A.length) +
+    el.innerHTML = '<div class="rule"><span>Player ' + (s.i + 1) + ' of ' + A.length + (mc ? ' · last guess' : '') + '</span>' + lvSwitch() + '</div>' + pips(s.res, s.i, A.length) +
       '<span class="chip">' + p[3] + '</span><span class="sub">Where did he come from?</span>' +
       '<div class="big">' + esc(p[0]) + '</div>' + (p[4] ? '<div class="team">' + esc(p[4]) + '</div>' : '') +
       (mc ? choiceButtons(H.choices(p[1], P, KEY + LG + 'A' + s.i, s.wrong)) : guessForm()) +
@@ -107,6 +107,11 @@
       if (v === p[1]) finishA(p, 'g', true);
       else { s.tries = 1; s.wrong = v; save(); renderA(); }
     };
+  }
+  // Rookie | Veteran switch shown in the header line of Where'd He Go and Connections (Pipeline is shared, so it has none).
+  function lvSwitch() {
+    var b = function (lv, label) { return '<button type="button" data-lv="' + lv + '" aria-pressed="' + (LV === lv) + '">' + label + '</button>'; };
+    return '<span class="lvl" role="group" aria-label="Difficulty">' + b('rookie', 'Rookie') + '<span aria-hidden="true">|</span>' + b('veteran', 'Veteran') + '</span>';
   }
   // After a wrong first guess the text box is swapped for four buttons (see H.choices).
   function guessForm() {
@@ -182,13 +187,13 @@
     var s = cur().b, el = $('panel');
     if (s.done) {
       var score = s.res.filter(function (x) { return x !== 'r'; }).length;
-      el.innerHTML = '<div class="rule"><span>Final</span><span>' + score + ' of 3</span></div>' + pips(s.res, -1, 3) +
+      el.innerHTML = '<div class="rule"><span>Final · ' + score + ' of 3</span>' + lvSwitch() + '</div>' + pips(s.res, -1, 3) +
         B.map(function (q, i) { return '<p>' + EMO[s.res[i]] + ' <b>' + esc(q.place) + '</b>: ' + q.four.map(function (p) { return esc(p[0]); }).join(', ') + '</p>'; }).join('') +
         shareBlock(shareText('b'));
       bindCopy(shareText('b')); return;
     }
     var q = B[s.i], mc = s.tries === 1;
-    el.innerHTML = '<div class="rule"><span>Puzzle ' + (s.i + 1) + ' of 3</span><span>' + (mc ? 'Last try' : '2 tries left') + '</span></div>' + pips(s.res, s.i, 3) +
+    el.innerHTML = '<div class="rule"><span>Puzzle ' + (s.i + 1) + ' of 3' + (mc ? ' · last try' : '') + '</span>' + lvSwitch() + '</div>' + pips(s.res, s.i, 3) +
       '<p class="sub">What do these two players have in common?</p>' +
       '<div class="four">' + q.four.map(function (p) { return '<div>' + esc(p[0]) + (p[4] ? '<small>' + esc(p[4]) + '</small>' : '') + '</div>'; }).join('') + '</div>' +
       (mc ? choiceButtons(H.choices(q.place, P, KEY + LG + 'B' + s.i, s.wrong)) : guessForm()) +
@@ -313,9 +318,7 @@
     renderAll();
     var d = day(), g = cur();
     $('meta').innerHTML = LG.toUpperCase() + ' · ' + KEY + '<br>Streak <b>' + streak() + '</b>';
-    Array.prototype.forEach.call(document.querySelectorAll('#league button'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-lg') === LG ? 'true' : 'false'); });
-    Array.prototype.forEach.call(document.querySelectorAll('#level button'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-lv') === LV ? 'true' : 'false'); });
-    note();
+    Array.prototype.forEach.call(document.querySelectorAll('#league button'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-lg') === LG ? 'true' : 'false'); });    note();
     var tabs = document.querySelectorAll('#tabs button');
     Array.prototype.forEach.call(tabs, function (b) {
       var m = b.getAttribute('data-m');
@@ -346,12 +349,11 @@
       };
     });
     // Switching difficulty keeps any live Pipeline run going: Pipeline is shared by both levels.
-    Array.prototype.forEach.call(document.querySelectorAll('#level button'), function (b) {
-      b.onclick = function () {
-        var lv = b.getAttribute('data-lv'); if (lv === LV) return;
-        S.lv = S.lv || {}; S.lv[LG] = lv;
-        setLeague(LG); save(); render();
-      };
+    $('panel').addEventListener('click', function (e) {
+      var b = e.target.closest('.lvl button'); if (!b) return;
+      var lv = b.getAttribute('data-lv'); if (lv === LV) return;
+      S.lv = S.lv || {}; S.lv[LG] = lv;
+      setLeague(LG); save(); render();
     });
     Array.prototype.forEach.call(document.querySelectorAll('#tabs button'), function (b) {
       b.onclick = function () { mode = b.getAttribute('data-m'); render(); };
