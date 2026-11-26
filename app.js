@@ -1,10 +1,10 @@
 (function () {
   var H = window.HD, P, ALL_PLACES, A, B, C, LG = 'nba';
   var KEY = H.dateKey();
-  var VER = 'v5'; // save-format version: changing it wipes every player's saved results and streaks
+  var VER = 'v6'; // save-format version: changing it wipes every player's saved results and streaks
   // Slate salt per league. It seeds the daily picks, so bumping one (e.g. '-r3' -> '-r4') gives that league a new set
   // for today and drops any results saved against the old set. Bump it whenever you change that league's data file.
-  var SALT = { nba: '-r6', nfl: '-r9' };
+  var SALT = { nba: '-r7', nfl: '-r10' };
   var S = { days: {}, v: VER };
   var mode = 'a';
   var run = null; // live Pipeline run: {end, timer, found:[]}
