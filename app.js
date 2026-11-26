@@ -212,23 +212,39 @@
         shareBlock(shareText('c'));
       bindCopy(shareText('c')); return;
     }
+    // A run that was started earlier (then reloaded, or the league/tab was switched) keeps its original clock.
+    if (!run && s.start) {
+      if (Date.now() < s.start + 60000) beginRun(s);
+      else { s.done = true; save(); head(); renderC(); return; }
+    }
     if (!run) {
+      // The school/country and its size stay hidden until the clock starts, so nobody can plan ahead.
       el.innerHTML = '<div class="rule"><span>Pipeline</span><span>60 seconds</span></div>' +
-        '<div class="big">' + esc(C.place) + '</div>' +
-        '<p class="sub">Name current ' + LG.toUpperCase() + ' players who fit this. Our pool has ' + n + ' of them. Pick each name from the list. You get one run a day.</p>' +
+        '<div class="big">Mystery ' + (LG === 'nfl' ? 'school' : 'school or country') + '</div>' +
+        '<p class="sub">Name as many current ' + LG.toUpperCase() + ' players as you can who came from today\'s mystery place. It\'s revealed when you start the clock. Pick each name from the list. You get one run a day, and the clock keeps running if you leave.</p>' +
         '<button class="btn" id="start">Start the clock</button>';
       $('start').onclick = startC; return;
     }
-    el.innerHTML = '<div class="rule"><span>' + esc(C.place) + '</span><span id="cnt"></span></div><div class="timer" id="clock"></div>' +
+    el.innerHTML = '<div class="rule"><span>Pipeline</span><span id="cnt"></span></div>' +
+      '<div class="big">' + esc(C.place) + '</div><div class="timer" id="clock"></div>' +
       '<form class="row" id="f" autocomplete="off"><div class="combo"><input type="text" id="g" role="combobox" aria-expanded="false" aria-controls="lb" aria-autocomplete="list" placeholder="Start typing a player" aria-label="Player name"><ul id="lb" class="lb" role="listbox" hidden></ul></div></form>' +
+      '<button type="button" class="btn alt pass" id="giveup">Give up</button>' +
       '<div class="msg" id="msg" aria-live="polite"></div><div class="found" id="fl"></div>';
     var g = $('g'); g.focus(); paintC();
     $('f').onsubmit = function (e) { e.preventDefault(); };
+    // Two taps to give up, so a stray tap doesn't end the day's only run.
+    var armed = null;
+    $('giveup').onclick = function () {
+      var b = $('giveup');
+      if (armed) { clearTimeout(armed); endC(); return; }
+      b.textContent = 'Tap again to give up';
+      armed = setTimeout(function () { armed = null; if ($('giveup')) $('giveup').textContent = 'Give up'; }, 3000);
+    };
     bindPicker(g, $('lb'), null, function (t) { return H.suggestNames(t, P, 8); }, function (name) {
       var hit = C.pool.filter(function (p) { return p[0] === name; })[0], msg = $('msg');
       if (!hit) { msg.className = 'msg bad'; msg.textContent = name + ' is not from here.'; }
       else if (run.found.indexOf(hit[0]) >= 0) { msg.className = 'msg'; msg.textContent = 'Already got ' + hit[0] + '.'; }
-      else { run.found.push(hit[0]); msg.className = 'msg ok'; msg.textContent = hit[0] + ' ✓'; paintC(); if (run.found.length === n) endC(); }
+      else { run.found.push(hit[0]); save(); msg.className = 'msg ok'; msg.textContent = hit[0] + ' ✓'; paintC(); if (run.found.length === n) endC(); }
       if (run) g.focus();
     });
   }
@@ -241,9 +257,13 @@
     if (fl) fl.innerHTML = run.found.map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('');
   }
   function startC() {
-    run = { end: Date.now() + 60000, found: [] };
+    var s = day().c; s.start = Date.now(); s.found = []; save();
+    beginRun(s); renderC();
+  }
+  // The live run shares its found list with the saved day record, so every hit is saved as it happens.
+  function beginRun(s) {
+    run = { end: s.start + 60000, found: s.found };
     run.timer = setInterval(function () { if (Date.now() >= run.end) endC(); else paintC(); }, 250);
-    renderC();
   }
   function endC() {
     if (!run) return;
