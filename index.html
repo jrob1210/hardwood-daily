@@ -38,9 +38,8 @@ h1{font-family:var(--display);font-weight:900;font-size:clamp(40px,11vw,64px);li
 h1 span{color:var(--accent)}
 .meta{font-family:var(--mono);font-size:12px;text-align:right;color:var(--muted);white-space:nowrap}
 .meta b{color:var(--ink);font-weight:600}
-.hright{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
-.theme{background:transparent;border:1px solid var(--line);color:var(--ink);font-size:15px;line-height:1;padding:5px 8px;cursor:pointer;border-radius:0}
-.theme:hover{border-color:var(--ink)}
+/* Theme switch at the very bottom; its buttons reuse the .lvl text-toggle style. */
+.themesw{display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 #league{display:grid;grid-template-columns:1fr 1fr;margin:12px 0 0;border:2px solid var(--ink)}
 #league button{font:600 14px var(--mono);letter-spacing:.06em;background:transparent;color:var(--ink);border:0;padding:9px 4px;cursor:pointer}
 #league button+button{border-left:2px solid var(--ink)}
@@ -107,10 +106,7 @@ input[type=text]{flex:1;min-width:0;font:400 17px var(--body);padding:12px;borde
 <div class="wrap">
   <header>
     <h1 id="brand">Hardwood <span>Daily</span></h1>
-    <div class="hright">
-      <button type="button" class="theme" id="theme" aria-label="Switch light or dark mode"></button>
-      <div class="meta" id="meta"></div>
-    </div>
+    <div class="meta" id="meta"></div>
   </header>
   <div id="league" role="group" aria-label="League"><button data-lg="nba" aria-pressed="true">NBA</button><button data-lg="nfl" aria-pressed="false">NFL</button></div>  <nav role="tablist" id="tabs">
     <button role="tab" data-m="a">Where'd He Go</button>
@@ -129,11 +125,12 @@ input[type=text]{flex:1;min-width:0;font:400 17px var(--body);padding:12px;borde
     <p>🟩 first try · 🟨 got it from the choices · 🟥 missed</p>
     <p>New puzzles every day at midnight. <span id="pool">Current rosters as of November 2026.</span></p>
   </details>
+  <div class="themesw"><span>Theme</span><span class="lvl" id="theme" role="group" aria-label="Theme"><button type="button" data-t="light" aria-pressed="false">Light</button><span aria-hidden="true">|</span><button type="button" data-t="dark" aria-pressed="false">Dark</button><span aria-hidden="true">|</span><button type="button" data-t="auto" aria-pressed="true">Auto</button></span></div>
 </div>
 <!-- ?v= makes browsers fetch matching copies after a deploy. Change it (any new value) whenever you push changes. -->
-<script src="data.js?v=2026-11-26f"></script>
-<script src="data_nfl.js?v=2026-11-26f"></script>
-<script src="game.js?v=2026-11-26f"></script>
-<script src="app.js?v=2026-11-26f"></script>
+<script src="data.js?v=2026-11-26g"></script>
+<script src="data_nfl.js?v=2026-11-26g"></script>
+<script src="game.js?v=2026-11-26g"></script>
+<script src="app.js?v=2026-11-26g"></script>
 </body>
 </html>

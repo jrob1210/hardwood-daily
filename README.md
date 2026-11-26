@@ -102,6 +102,6 @@ The site is served straight from the `main` branch, with no build step. The live
 ## Notes
 
 - Saves are per-browser. Clearing site data, or switching device or browser, starts a player fresh.
-- Light/dark: the site follows the device setting until a player taps the ☀️/🌙 button in the header. That choice is saved under its own key (`hdTheme`), so changing `VER` doesn't reset it.
+- Light/dark: the "Theme: Light | Dark | Auto" switch at the bottom of the page. Auto (the default) follows the device. That choice is saved under its own key (`hdTheme`), so changing `VER` doesn't reset it.
 - The saved-data key is `hd1`, versioned by `VER` in `app.js`. Changing `VER` wipes everyone's saved progress and streaks, so only change it if you change the save format.
 - A new puzzle set unlocks at each player's local midnight.
