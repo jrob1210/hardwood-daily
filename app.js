@@ -82,9 +82,10 @@
       '<span class="chip">' + p[3] + '</span><span class="sub">Where did he come from?</span>' +
       '<div class="big">' + esc(p[0]) + '</div>' + (p[4] ? '<div class="team">' + esc(p[4]) + '</div>' : '') +
       (mc ? choiceButtons(H.choices(p[1], P, KEY + LG + 'A' + s.i, s.wrong)) : guessForm()) +
-      '<button type="button" class="btn alt pass" id="pass">I don\'t know</button>' +
-      '<div class="msg' + (mc ? ' bad' : '') + '" id="msg" aria-live="polite">' + (mc ? esc(missMsg(p[1], s.wrong)) : '') + '</div><div id="after"></div>';
-    $('pass').onclick = function () { finishA(p, 'r', false); };
+      '<button type="button" class="btn alt pass" id="pass">' + (mc ? 'Reveal answer' : 'I don\'t know') + '</button>' +
+      '<div class="msg' + (mc && s.wrong ? ' bad' : '') + '" id="msg" aria-live="polite">' + (mc ? esc(missMsg(s.wrong)) : '') + '</div><div id="after"></div>';
+    // First "I don't know" opens the four choices; on the choices screen the same button reveals the answer.
+    $('pass').onclick = function () { if (mc) finishA(p, 'r', false); else { s.tries = 1; s.wrong = null; save(); renderA(); } };
     if (mc) { bindChoices(p[1], function (ok) { finishA(p, ok ? 'y' : 'r', ok); }); return; }
     $('g').focus();
     var chosen = bindPicker($('g'), $('lb'), $('go'));
@@ -101,8 +102,8 @@
   }
   // No conference/region hint here: with four choices it usually gives the answer away.
   // (H.hintFor and the HINTS table in game.js are kept in case hints come back.)
-  function missMsg(place, wrong) {
-    return (wrong ? 'Not ' + wrong + '. ' : 'Not it. ') + 'Pick one of these four.';
+  function missMsg(wrong) {
+    return wrong ? 'Not ' + wrong + '. It\'s one of these:' : 'It\'s one of these:';
   }
   function choiceButtons(opts) {
     return '<div class="opts" id="opts">' + opts.map(function (o) { return '<button type="button" class="btn" data-o="' + esc(o) + '">' + esc(o) + '</button>'; }).join('') + '</div>';
@@ -179,9 +180,9 @@
       '<p class="sub">What do these two players have in common?</p>' +
       '<div class="four">' + q.four.map(function (p) { return '<div>' + esc(p[0]) + (p[4] ? '<small>' + esc(p[4]) + '</small>' : '') + '</div>'; }).join('') + '</div>' +
       (mc ? choiceButtons(H.choices(q.place, P, KEY + LG + 'B' + s.i, s.wrong)) : guessForm()) +
-      '<button type="button" class="btn alt pass" id="pass">I don\'t know</button>' +
-      '<div class="msg' + (mc ? ' bad' : '') + '" id="msg" aria-live="polite">' + (mc ? esc(missMsg(q.place, s.wrong)) : '') + '</div><div id="after"></div>';
-    $('pass').onclick = function () { endB('r', false); };
+      '<button type="button" class="btn alt pass" id="pass">' + (mc ? 'Reveal answer' : 'I don\'t know') + '</button>' +
+      '<div class="msg' + (mc && s.wrong ? ' bad' : '') + '" id="msg" aria-live="polite">' + (mc ? esc(missMsg(s.wrong)) : '') + '</div><div id="after"></div>';
+    $('pass').onclick = function () { if (mc) endB('r', false); else { s.tries = 1; s.wrong = null; save(); renderB(); } };
     if (mc) { bindChoices(q.place, function (ok) { endB(ok ? 'y' : 'r', ok); }); return; }
     $('g').focus();
     var chosen = bindPicker($('g'), $('lb'), $('go'));
