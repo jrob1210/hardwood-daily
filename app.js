@@ -338,7 +338,31 @@
     set('pool', 'Current ' + LG.toUpperCase() + ' rosters as of November 2026: ' + P.length.toLocaleString('en-US') + ' players from ' +
       ALL_PLACES.length + ' schools and countries.');
   }
+  // Light/dark button. Saved separately from game progress (key 'hdTheme') so resets never touch it.
+  function isDark() {
+    var t = document.documentElement.getAttribute('data-theme');
+    return t ? t === 'dark' : !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+  function paintThemeBtn() {
+    var b = $('theme'); if (!b) return;
+    b.textContent = isDark() ? '☀️' : '🌙';
+    b.setAttribute('aria-label', isDark() ? 'Switch to light mode' : 'Switch to dark mode');
+    b.title = b.getAttribute('aria-label');
+  }
+  function initTheme() {
+    var b = $('theme'); if (!b) return;
+    paintThemeBtn();
+    b.onclick = function () {
+      var t = isDark() ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+      try { localStorage.setItem('hdTheme', t); } catch (e) {}
+      paintThemeBtn();
+    };
+    // While following the device (no saved choice), keep the icon in sync if the device switches.
+    if (window.matchMedia) { var mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', paintThemeBtn); }
+  }
   function start() {
+    initTheme();
     load();
     setLeague(S.lg === 'nfl' ? 'nfl' : 'nba');
     day(); save();

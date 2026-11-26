@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hardwood Daily</title>
+<script>
+// Apply a saved light/dark choice before the page paints (no flash). No saved choice = follow the device.
+try { var t = localStorage.getItem('hdTheme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -34,6 +38,9 @@ h1{font-family:var(--display);font-weight:900;font-size:clamp(40px,11vw,64px);li
 h1 span{color:var(--accent)}
 .meta{font-family:var(--mono);font-size:12px;text-align:right;color:var(--muted);white-space:nowrap}
 .meta b{color:var(--ink);font-weight:600}
+.hright{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.theme{background:transparent;border:1px solid var(--line);color:var(--ink);font-size:15px;line-height:1;padding:5px 8px;cursor:pointer;border-radius:0}
+.theme:hover{border-color:var(--ink)}
 #league{display:grid;grid-template-columns:1fr 1fr;margin:12px 0 0;border:2px solid var(--ink)}
 #league button{font:600 14px var(--mono);letter-spacing:.06em;background:transparent;color:var(--ink);border:0;padding:9px 4px;cursor:pointer}
 #league button+button{border-left:2px solid var(--ink)}
@@ -100,7 +107,10 @@ input[type=text]{flex:1;min-width:0;font:400 17px var(--body);padding:12px;borde
 <div class="wrap">
   <header>
     <h1 id="brand">Hardwood <span>Daily</span></h1>
-    <div class="meta" id="meta"></div>
+    <div class="hright">
+      <button type="button" class="theme" id="theme" aria-label="Switch light or dark mode"></button>
+      <div class="meta" id="meta"></div>
+    </div>
   </header>
   <div id="league" role="group" aria-label="League"><button data-lg="nba" aria-pressed="true">NBA</button><button data-lg="nfl" aria-pressed="false">NFL</button></div>  <nav role="tablist" id="tabs">
     <button role="tab" data-m="a">Where'd He Go</button>
@@ -121,9 +131,9 @@ input[type=text]{flex:1;min-width:0;font:400 17px var(--body);padding:12px;borde
   </details>
 </div>
 <!-- ?v= makes browsers fetch matching copies after a deploy. Change it (any new value) whenever you push changes. -->
-<script src="data.js?v=2026-11-26e"></script>
-<script src="data_nfl.js?v=2026-11-26e"></script>
-<script src="game.js?v=2026-11-26e"></script>
-<script src="app.js?v=2026-11-26e"></script>
+<script src="data.js?v=2026-11-26f"></script>
+<script src="data_nfl.js?v=2026-11-26f"></script>
+<script src="game.js?v=2026-11-26f"></script>
+<script src="app.js?v=2026-11-26f"></script>
 </body>
 </html>
