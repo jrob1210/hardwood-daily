@@ -15,13 +15,13 @@ A daily NBA and NFL trivia game: guess where pro players went to college (or whi
 
 ## Difficulty: Rookie and Veteran
 
-A small "Rookie | Veteran" switch on the right of the puzzle header (in Where'd He Go and Connections) changes difficulty. New visitors start on **Rookie**, and each league remembers the last choice.
+A small "Rookie | Veteran" switch on the right of the puzzle header (in Roots and Common Ground) changes difficulty. New visitors start on **Rookie**, and each league remembers the last choice.
 
 | | Rookie (easier) | Veteran (harder) |
 | --- | --- | --- |
-| NBA Where'd He Go / Connections | Starters only | Anyone on a roster |
-| NFL Where'd He Go | 2 QBs, then 3 RB/WR/TE (all flagged) | QB, 2 RB/WR/TE, 1 OL or defense, 1 wildcard (any flagged non-OL, or a kicker/punter/long snapper) |
-| NFL Connections | Flagged QBs, RBs, WRs, TEs | Any flagged player |
+| NBA Roots / Common Ground | Starters only | Anyone on a roster |
+| NFL Roots | 2 QBs, then 3 RB/WR/TE (all flagged) | QB, 2 RB/WR/TE, 1 OL or defense, 1 wildcard (any flagged non-OL, or a kicker/punter/long snapper) |
+| NFL Common Ground | Flagged QBs, RBs, WRs, TEs | Any flagged player |
 | Pipeline | Same round for both | Same round for both |
 
 Each difficulty has its own daily puzzles and saved progress. The streak is per league, and playing either difficulty counts.
@@ -54,7 +54,7 @@ Each league's data file is one JavaScript array, one player per row:
 | 3. kind | `"c"` college, `"n"` country, `"x"` for the place `"No College"` (prep-to-pro, G League Ignite, etc.) |
 | 4. position | NBA: `G` `F` `C`. NFL: `QB` `RB` `WR` `TE` `OL` `DL` `LB` `DB` `ST` |
 | 5. team | Current team's full name, or `""` for a free agent (the team line is then hidden) |
-| 6. starter | `1` to mark a starter, otherwise leave it off. **NBA:** the 5 players in each team's starting lineup (150 total); Rookie mode only uses these in Where'd He Go and Connections. **NFL:** depth-chart players, as follows. **QB:** each team's QB1 and QB2. **WR:** the first-string player at each of the team's three WR spots (3 per team). **RB/TE:** first and second string. **OL/DL/LB/DB:** starters. NFL "Where'd He Go" only picks flagged players, except kickers/punters/long snappers (`ST`), who can appear in the 5th "wildcard" slot. NFL Connections only shows flagged players. Pipeline counts everyone. |
+| 6. starter | `1` to mark a starter, otherwise leave it off. **NBA:** the 5 players in each team's starting lineup (150 total); Rookie mode only uses these in Roots and Common Ground. **NFL:** depth-chart players, as follows. **QB:** each team's QB1 and QB2. **WR:** the first-string player at each of the team's three WR spots (3 per team). **RB/TE:** first and second string. **OL/DL/LB/DB:** starters. NFL "Roots" only picks flagged players, except kickers/punters/long snappers (`ST`), who can appear in the 5th "wildcard" slot. NFL Common Ground only shows flagged players. Pipeline counts everyone. |
 
 ### Steps
 

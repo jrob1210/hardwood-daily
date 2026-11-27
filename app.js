@@ -16,7 +16,7 @@
     ALL_PLACES = Object.keys(H.groupBy(P)).sort();
     LV = (S.lv && S.lv[lg]) || 'rookie'; // each league remembers its own difficulty
     var k = KEY + SALT[lg] + (lg === 'nfl' ? '-nfl' : ''), kl = k + '-' + LV;
-    // Where'd He Go and Connections differ by difficulty; Pipeline is shared by both.
+    // Roots and Common Ground differ by difficulty; Pipeline is shared by both.
     A = lg === 'nfl' ? H.dailyPlayersNFL(P, kl, LV) : H.dailyPlayers(P, kl, 5, LV);
     B = H.dailyConnections(P, kl, 3, lg, LV); C = H.dailyPipeline(P, k, lg);
     document.documentElement.setAttribute('data-league', lg); // switches the color scheme (see index.html)
@@ -37,7 +37,7 @@
     if (S.days[k] && S.days[k].slate !== SALT[LG]) delete S.days[k]; // new slate: drop results saved against the old one
     return S.days[k] || (S.days[k] = { slate: SALT[LG], c: { found: [], done: false } });
   }
-  // Where'd He Go (a) and Connections (b) progress for the current difficulty.
+  // Roots (a) and Common Ground (b) progress for the current difficulty.
   function cur() {
     var d = day();
     return d[LV] || (d[LV] = { a: { i: 0, tries: 0, res: [], done: false }, b: { i: 0, tries: 0, res: [], done: false } });
@@ -75,8 +75,8 @@
   }
   function shareText(m) {
     var d = day(), g = cur();
-    if (m === 'a') return title(true) + "\nWhere'd He Go " + g.a.res.map(function (x) { return EMO[x]; }).join('');
-    if (m === 'b') return title(true) + '\nConnections ' + g.b.res.map(function (x) { return EMO[x]; }).join('');
+    if (m === 'a') return title(true) + "\nRoots " + g.a.res.map(function (x) { return EMO[x]; }).join('');
+    if (m === 'b') return title(true) + '\nCommon Ground ' + g.b.res.map(function (x) { return EMO[x]; }).join('');
     return title() + '\nPipeline: ' + C.place + ' ' + d.c.found.length + '/' + C.pool.length;
   }
 
@@ -109,7 +109,7 @@
       else { s.tries = 1; s.wrong = v; save(); renderA(); }
     };
   }
-  // Rookie | Veteran switch shown in the header line of Where'd He Go and Connections (Pipeline is shared, so it has none).
+  // Rookie | Veteran switch shown in the header line of Roots and Common Ground (Pipeline is shared, so it has none).
   function lvSwitch() {
     var b = function (lv, label) { return '<button type="button" data-lv="' + lv + '" aria-pressed="' + (LV === lv) + '">' + label + '</button>'; };
     return '<span class="lvl" role="group" aria-label="Difficulty">' + b('rookie', 'Rookie') + '<span aria-hidden="true">|</span>' + b('veteran', 'Veteran') + '</span>';
@@ -308,8 +308,8 @@
       ['rookie', 'veteran'].forEach(function (lv) {
         var g = rec[lv], name = lv === 'rookie' ? 'Rookie' : 'Veteran';
         if (!g) return;
-        if (g.a.done) L.push(name + ": Where'd He Go " + g.a.res.map(function (x) { return EMO[x]; }).join(''));
-        if (g.b.done) L.push(name + ': Connections ' + g.b.res.map(function (x) { return EMO[x]; }).join(''));
+        if (g.a.done) L.push(name + ": Roots " + g.a.res.map(function (x) { return EMO[x]; }).join(''));
+        if (g.b.done) L.push(name + ': Common Ground ' + g.b.res.map(function (x) { return EMO[x]; }).join(''));
       });
       if (rec.c && rec.c.done) { var pc = pipelineFor(lg); L.push('Pipeline: ' + pc.place + ' ' + rec.c.found.length + '/' + pc.pool.length); }
       if (L.length) blocks.push((lg === 'nfl' ? 'Gridiron' : 'Hardwood') + ' Daily · ' + lg.toUpperCase() + ' · ' + KEY + '\n' + L.join('\n'));
