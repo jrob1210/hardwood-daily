@@ -293,20 +293,35 @@
   }
 
   /* ---------- Share all ---------- */
+  // Everything finished today, across both leagues and both difficulties. Games not finished are left out.
+  var pipeCache = {};
+  function pipelineFor(lg) {
+    var k = KEY + SALT[lg] + (lg === 'nfl' ? '-nfl' : '');
+    if (!pipeCache[k]) pipeCache[k] = H.dailyPipeline(lg === 'nfl' ? window.PLAYERS_NFL : window.PLAYERS, k, lg);
+    return pipeCache[k];
+  }
   function allText() {
-    var d = day(), g = cur(), L = [title(true)];
-    L.push("Where'd He Go " + (g.a.done ? g.a.res.map(function (x) { return EMO[x]; }).join('') : '-'));
-    L.push('Connections ' + (g.b.done ? g.b.res.map(function (x) { return EMO[x]; }).join('') : '-'));
-    L.push('Pipeline ' + (d.c.done ? C.place + ' ' + d.c.found.length + '/' + C.pool.length : '-'));
-    return L.join('\n');
+    var blocks = [];
+    ['nba', 'nfl'].forEach(function (lg) {
+      var rec = S.days[KEY + (lg === 'nfl' ? '|nfl5' : '')], L = [];
+      if (!rec || rec.slate !== SALT[lg]) return; // nothing saved for today's set
+      ['rookie', 'veteran'].forEach(function (lv) {
+        var g = rec[lv], name = lv === 'rookie' ? 'Rookie' : 'Veteran';
+        if (!g) return;
+        if (g.a.done) L.push(name + ": Where'd He Go " + g.a.res.map(function (x) { return EMO[x]; }).join(''));
+        if (g.b.done) L.push(name + ': Connections ' + g.b.res.map(function (x) { return EMO[x]; }).join(''));
+      });
+      if (rec.c && rec.c.done) { var pc = pipelineFor(lg); L.push('Pipeline: ' + pc.place + ' ' + rec.c.found.length + '/' + pc.pool.length); }
+      if (L.length) blocks.push((lg === 'nfl' ? 'Gridiron' : 'Hardwood') + ' Daily · ' + lg.toUpperCase() + ' · ' + KEY + '\n' + L.join('\n'));
+    });
+    return blocks.join('\n\n');
   }
   function renderAll() {
-    var d = day(), g = cur(), box = $('all');
-    if (!(g.a.done || g.b.done || d.c.done)) { box.innerHTML = ''; return; }
-    var t = allText(), left = [g.a, g.b, d.c].filter(function (x) { return !x.done; }).length;
+    var box = $('all'), t = allText();
+    if (!t) { box.innerHTML = ''; return; }
     box.innerHTML = '<div class="result"><h2>All of today</h2><pre>' + esc(t) + '</pre>' +
       '<button class="btn" id="allcopy">Copy all results</button> <span class="msg" id="allmsg"></span>' +
-      (left ? '<div class="sub" style="margin:8px 0 0">' + left + ' of 3 still to play. A dash means not played yet.</div>' : '') + '</div>';
+      '<div class="sub" style="margin:8px 0 0">Everything you\'ve finished today, in both leagues.</div></div>';
     $('allcopy').onclick = function () {
       var m = $('allmsg');
       try { navigator.clipboard.writeText(allText()).then(function () { m.textContent = 'Copied.'; }, function () { m.textContent = 'Copy blocked. Select the text above.'; }); }
